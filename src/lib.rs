@@ -10,14 +10,19 @@ use std::io::{self, Write};
 
 pub fn create_frame(x: u16, y: u16) -> Vec<Vec<Color>> {
     let mut frame = Vec::new();
+    let mut color = Color::Rgb { r: 255, g: 0, b: 0 };
 
-    for _i in 0..x {
+    for _y in 0..y {
         let mut row = Vec::new();
-        for _y in 0..y {
-            let colour = Color::Rgb { r: 255, g: 0, b: 0 };
-            row.push(colour);
+        for _x in 0..x {
+            row.push(color);
         }
         frame.push(row);
+        if color == (Color::Rgb { r: 255, g: 0, b: 0 }) {
+            color = Color::Rgb { r: 0, g: 0, b: 255 };
+        } else {
+            color = Color::Rgb { r: 255, g: 0, b: 0 };
+        }
     }
     frame
 }
@@ -28,15 +33,16 @@ pub fn render_frame(frame: &Vec<Vec<Color>>) -> io::Result<()> {
 
     execute!(stdout, terminal::Clear(terminal::ClearType::All))?;
 
-    for x in 0..frame.len() {
-        let row = &frame[x];
-        for y in 0..row.len() {
-            let color = row[y];
+    for y in 0..frame.len() {
+        let row = &frame[y];
+        for x in 0..row.len() {
+            let color = row[x];
+            let x = x as u16 * 2; // as inserting double blocks for squares
             queue!(
                 stdout,
-                cursor::MoveTo(x as u16, y as u16),
+                cursor::MoveTo(x, y as u16),
                 SetForegroundColor(color),
-                Print("█".to_string()) // style::PrintStyledContent("█".magenta())
+                Print("██".to_string())
             )?;
         }
     }
