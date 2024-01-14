@@ -3,29 +3,18 @@
 
 use crossterm::{
     cursor, execute, queue,
-    style::{self, Stylize},
+    style::{self, Color, Print, SetForegroundColor, Stylize},
     terminal,
 };
 use std::io::{self, Write};
 
-#[derive(Debug)]
-pub struct Colour {
-    red: u8,
-    green: u8,
-    blue: u8,
-}
-
-pub fn create_frame(x: u32, y: u32) -> Vec<Vec<Colour>> {
+pub fn create_frame(x: u16, y: u16) -> Vec<Vec<Color>> {
     let mut frame = Vec::new();
 
     for _i in 0..x {
         let mut row = Vec::new();
         for _y in 0..y {
-            let colour = Colour {
-                red: 255,
-                blue: 0,
-                green: 0,
-            };
+            let colour = Color::Rgb { r: 255, g: 0, b: 0 };
             row.push(colour);
         }
         frame.push(row);
@@ -33,7 +22,7 @@ pub fn create_frame(x: u32, y: u32) -> Vec<Vec<Colour>> {
     frame
 }
 
-pub fn render_frame(frame: &Vec<Vec<Colour>>) -> io::Result<()> {
+pub fn render_frame(frame: &Vec<Vec<Color>>) -> io::Result<()> {
     // should check and throw error if terminal is smaller than framei
     let mut stdout = io::stdout();
 
@@ -42,13 +31,17 @@ pub fn render_frame(frame: &Vec<Vec<Colour>>) -> io::Result<()> {
     for x in 0..frame.len() {
         let row = &frame[x];
         for y in 0..row.len() {
+            let color = row[y];
             queue!(
                 stdout,
                 cursor::MoveTo(x as u16, y as u16),
-                style::PrintStyledContent("█".blue())
+                SetForegroundColor(color),
+                Print("█".to_string()) // style::PrintStyledContent("█".magenta())
             )?;
         }
     }
+
+    stdout.flush()?;
 
     Ok(())
 }
