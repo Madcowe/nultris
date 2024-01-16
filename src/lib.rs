@@ -8,6 +8,29 @@ use crossterm::{
 };
 use std::io::{self, Write};
 
+#[derive(Debug)]
+pub struct Bloxel {
+    occupied: bool,
+    color: Color,
+}
+
+pub fn create_play_area(x: u16, y: u16, bg_color: Color) -> Vec<Vec<Bloxel>> {
+    let mut play_area = Vec::new();
+
+    for _y in 0..y {
+        let mut row = Vec::new();
+        for _x in 0..x {
+            let bloxel = Bloxel {
+                occupied: false,
+                color: bg_color,
+            };
+            row.push(bloxel);
+        }
+        play_area.push(row);
+    }
+    play_area
+}
+
 pub fn create_frame(x: u16, y: u16) -> Vec<Vec<Color>> {
     let mut frame = Vec::new();
     let mut color = Color::Rgb { r: 255, g: 0, b: 0 };
