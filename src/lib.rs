@@ -31,22 +31,20 @@ pub fn create_play_area(x: u16, y: u16, bg_color: Color) -> Vec<Vec<Bloxel>> {
     play_area
 }
 
-pub fn create_frame(x: u16, y: u16) -> Vec<Vec<Color>> {
+pub fn create_frame(play_area: Vec<Vec<Bloxel>>) -> Vec<Vec<Color>> {
     let mut frame = Vec::new();
-    let mut color = Color::Rgb { r: 255, g: 0, b: 0 };
 
-    for _y in 0..y {
+    for x in 0..play_area.len() {
         let mut row = Vec::new();
-        for _x in 0..x {
-            row.push(color);
+        for y in 0..play_area[x].len() {
+            row.push(play_area[x][y].color);
+            println!("{} {}", x, y);
         }
         frame.push(row);
-        if color == (Color::Rgb { r: 255, g: 0, b: 0 }) {
-            color = Color::Rgb { r: 0, g: 0, b: 255 };
-        } else {
-            color = Color::Rgb { r: 255, g: 0, b: 0 };
-        }
     }
+
+    // add code to render current shape
+
     frame
 }
 
