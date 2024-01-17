@@ -1,0 +1,3 @@
+- Create current shape object
+- Modify create_frame to take current object an render after play area
+? Does occupied in Bloxel need to become an u8 rather than bool to match up with shapes in Piece?
