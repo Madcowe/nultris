@@ -1,3 +1,3 @@
-- Create current shape object
-- Modify create_frame to take current object an render after play area
+- Create move_shape function that first check if shape can move to location and move it if it can
+- Also returns a vaule indicating if in the new position it can stop falling.
 ? Does occupied in Bloxel need to become an u8 rather than bool to match up with shapes in Piece?

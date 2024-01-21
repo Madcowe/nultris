@@ -49,6 +49,44 @@ pub fn create_current_piece(pieces: &Vec<Piece>) -> Piece {
     pieces[0].clone()
 }
 
+pub fn move_current_piece(
+    x: usize,
+    y: usize,
+    play_area: &Vec<Vec<Bloxel>>,
+    current_piece: &mut Piece,
+) -> bool {
+    let mut legal_move = true;
+    let max_x = play_area.len();
+    let max_y = play_area[0].len();
+    {
+        let (mut x, mut y) = (x, y);
+        let shape = current_piece.shapes[current_piece.orientation];
+        for column in shape {
+            for occupied in column {
+                if ((x >= max_x || y >= max_y) && occupied > 0)
+                    || (occupied > 0 && play_area[x][y].occupied == true)
+                {
+                    // if ocupied co-ordinate outisde play_area or both play area and shape
+                    // occupied, move is not legal leave loop as no need to check rest.
+                    legal_move = false;
+                    break;
+                }
+                y += 1;
+            }
+            if legal_move == false {
+                break;
+            }
+            y = current_piece.y;
+            x += 1;
+        }
+    }
+    if legal_move {
+        current_piece.x = x;
+        current_piece.y = y;
+    }
+    legal_move
+}
+
 pub fn create_play_area(x: u16, y: u16, bg_color: Color) -> Vec<Vec<Bloxel>> {
     let mut play_area = Vec::new();
 
@@ -66,7 +104,7 @@ pub fn create_play_area(x: u16, y: u16, bg_color: Color) -> Vec<Vec<Bloxel>> {
     play_area
 }
 
-pub fn create_frame(play_area: &Vec<Vec<Bloxel>>, current_shape: &Piece) -> Vec<Vec<Color>> {
+pub fn create_frame(play_area: &Vec<Vec<Bloxel>>, current_piece: &Piece) -> Vec<Vec<Color>> {
     let mut frame = Vec::new();
 
     for x in 0..play_area.len() {
@@ -80,13 +118,12 @@ pub fn create_frame(play_area: &Vec<Vec<Bloxel>>, current_shape: &Piece) -> Vec<
     // note this just renders the shape it doesn't check for collision as will be handled beforehand
     let max_x = frame.len();
     let max_y = frame[0].len();
-    let (mut x, mut y, color) = (current_shape.x, current_shape.y, current_shape.color);
-    let shape = current_shape.shapes[current_shape.orientation];
+    let (mut x, mut y, color) = (current_piece.x, current_piece.y, current_piece.color);
+    let shape = current_piece.shapes[current_piece.orientation];
     for column in shape {
         if x < max_x {
             // if x co-oridnate is wihtin frame
             for occupied in column {
-                println!("{},{},{}", x, y, occupied);
                 if y < max_y && occupied > 0 {
                     // if y co-ordinate wihtin frame and occupied
                     frame[x][y] = color;
@@ -94,7 +131,7 @@ pub fn create_frame(play_area: &Vec<Vec<Bloxel>>, current_shape: &Piece) -> Vec<
                 y += 1;
             }
         }
-        y = current_shape.y;
+        y = current_piece.y;
         x += 1;
     }
 
