@@ -52,9 +52,9 @@ pub fn create_current_piece(pieces: &Vec<Piece>) -> Piece {
 pub fn create_play_area(x: u16, y: u16, bg_color: Color) -> Vec<Vec<Bloxel>> {
     let mut play_area = Vec::new();
 
-    for _y in 0..y {
+    for _x in 0..x {
         let mut row = Vec::new();
-        for _x in 0..x {
+        for _y in 0..y {
             let bloxel = Bloxel {
                 occupied: false,
                 color: bg_color,
@@ -97,7 +97,7 @@ pub fn create_frame(play_area: &Vec<Vec<Bloxel>>, current_shape: &Piece) -> Vec<
         x += 1;
     }
 
-    frame[19][9] = Color::Green;
+    frame[9][10] = Color::Green;
 
     frame
 }
@@ -108,10 +108,10 @@ pub fn render_frame(frame: &Vec<Vec<Color>>) -> io::Result<()> {
 
     execute!(stdout, terminal::Clear(terminal::ClearType::All))?;
 
-    for y in 0..frame.len() {
-        let row = &frame[y];
-        for x in 0..row.len() {
-            let color = row[x];
+    for x in 0..frame.len() {
+        let row = &frame[x];
+        for y in 0..row.len() {
+            let color = row[y];
             let x = x as u16 * 2; // as inserting double blocks for squares
             queue!(
                 stdout,
