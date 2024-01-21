@@ -28,10 +28,10 @@ pub fn create_pieces() -> Vec<Piece> {
     let mut pieces = Vec::new();
 
     let mut shapes = Vec::new();
-    let shape: [[u8; 4]; 4] = [[1, 1, 0, 0], [1, 0, 0, 0], [1, 0, 0, 0], [0, 0, 0, 0]];
+    let shape: [[u8; 4]; 4] = [[1, 1, 1, 0], [1, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]];
     shapes.push(shape);
     let piece: Piece = Piece {
-        x: 0,
+        x: 4,
         y: 0,
         color: Color::Rgb { r: 255, g: 0, b: 0 },
         shapes,
@@ -70,11 +70,11 @@ pub fn create_frame(play_area: &Vec<Vec<Bloxel>>, current_shape: &Piece) -> Vec<
     let mut frame = Vec::new();
 
     for x in 0..play_area.len() {
-        let mut row = Vec::new();
+        let mut column = Vec::new();
         for y in 0..play_area[x].len() {
-            row.push(play_area[x][y].color);
+            column.push(play_area[x][y].color);
         }
-        frame.push(row);
+        frame.push(column);
     }
 
     // note this just renders the shape it doesn't check for collision as will be handled beforehand
@@ -82,22 +82,23 @@ pub fn create_frame(play_area: &Vec<Vec<Bloxel>>, current_shape: &Piece) -> Vec<
     let max_y = frame[0].len();
     let (mut x, mut y, color) = (current_shape.x, current_shape.y, current_shape.color);
     let shape = current_shape.shapes[current_shape.orientation];
-    for row in shape {
-        if x <= max_x {
+    for column in shape {
+        if x < max_x {
             // if x co-oridnate is wihtin frame
-            for occupied in row {
-                println!("{},{}", x, y);
-                if y <= max_y && occupied > 0 {
+            for occupied in column {
+                println!("{},{},{}", x, y, occupied);
+                if y < max_y && occupied > 0 {
                     // if y co-ordinate wihtin frame and occupied
                     frame[x][y] = color;
                 }
                 y += 1;
             }
         }
+        y = current_shape.y;
         x += 1;
     }
 
-    frame[9][10] = Color::Green;
+    // frame[0][2] = Color::Green;
 
     frame
 }
