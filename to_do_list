@@ -1,3 +1,4 @@
-- Create move_shape function that first check if shape can move to location and move it if it can
-- Also returns a vaule indicating if in the new position it can stop falling.
+- Create function that retrun true if current shape can stop falling.
+- Create function that if the current shape can stop falling add it to the occuped play area and relinquishes current shape.
 ? Does occupied in Bloxel need to become an u8 rather than bool to match up with shapes in Piece?
+? How do you stop user scrolling up terminal and seeing old frames

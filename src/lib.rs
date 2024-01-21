@@ -1,5 +1,5 @@
 // An attribute to hide warnings for unused code.
-#![allow(dead_code)]
+// #![allow(dead_code)]
 
 use crossterm::{
     cursor, execute, queue,
@@ -8,6 +8,7 @@ use crossterm::{
 };
 use rand::prelude::*;
 use std::io::{self, Write};
+use std::{thread, time};
 
 #[derive(Debug)]
 pub struct Bloxel {
@@ -22,6 +23,34 @@ pub struct Piece {
     color: Color,
     shapes: Vec<[[u8; 4]; 4]>,
     orientation: usize,
+}
+
+pub fn main_loop() -> io::Result<()> {
+    // setup, maybe move to own funciton later
+    let play_area = create_play_area(10, 20, crossterm::style::Color::Rgb { r: 0, g: 0, b: 0 });
+    let pieces = create_pieces();
+    let mut current_piece = create_current_piece(&pieces);
+    let mut legal_move = true;
+    let frame = create_frame(&play_area, &current_piece);
+
+    // terminal::enable_raw_mode()?;
+    render_frame(&frame)?;
+
+    while legal_move == true {
+        let one_second = time::Duration::from_secs(1);
+        thread::sleep(one_second);
+        legal_move = move_current_piece(
+            current_piece.x,
+            current_piece.y + 1,
+            &play_area,
+            &mut current_piece,
+        );
+        println!("{:}", legal_move);
+        let frame = create_frame(&play_area, &current_piece);
+        render_frame(&frame)?;
+    }
+    // terminal::disable_raw_mode()?;
+    Ok(())
 }
 
 pub fn create_pieces() -> Vec<Piece> {
