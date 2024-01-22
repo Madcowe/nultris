@@ -10,14 +10,21 @@ use rand::prelude::*;
 use std::io::{self, Write};
 use std::{thread, time};
 
+#[derive(PartialEq, Debug)]
+enum NextGameAction {
+    Move,
+    NewPiece,
+    GameOver,
+}
+
 #[derive(Debug)]
-pub struct Bloxel {
+struct Bloxel {
     occupied: bool,
     color: Color,
 }
 
 #[derive(Debug, Clone)]
-pub struct Piece {
+struct Piece {
     x: usize,
     y: usize,
     color: Color,
@@ -30,30 +37,37 @@ pub fn main_loop() -> io::Result<()> {
     let play_area = create_play_area(10, 20, crossterm::style::Color::Rgb { r: 0, g: 0, b: 0 });
     let pieces = create_pieces();
     let mut current_piece = create_current_piece(&pieces);
-    let mut legal_move = true;
+    let mut next_game_action = NextGameAction::Move;
     let frame = create_frame(&play_area, &current_piece);
 
     // terminal::enable_raw_mode()?;
     render_frame(&frame)?;
 
-    while legal_move == true {
-        let one_second = time::Duration::from_secs(1);
-        thread::sleep(one_second);
-        legal_move = move_current_piece(
+    while next_game_action != NextGameAction::GameOver {
+        let frame = create_frame(&play_area, &current_piece);
+        render_frame(&frame)?;
+        if next_game_action == NextGameAction::NewPiece {
+            current_piece = create_current_piece(&pieces);
+            next_game_action = NextGameAction::Move;
+        }
+        let delay = time::Duration::from_millis(500);
+        thread::sleep(delay);
+        let legal_move = move_current_piece(
             current_piece.x,
             current_piece.y + 1,
             &play_area,
             &mut current_piece,
         );
-        println!("{:}", legal_move);
-        let frame = create_frame(&play_area, &current_piece);
-        render_frame(&frame)?;
+        if legal_move && can_stop_falling(&play_area, &current_piece) {
+            next_game_action = NextGameAction::NewPiece;
+        }
+        println!("{:?}", next_game_action);
     }
     // terminal::disable_raw_mode()?;
     Ok(())
 }
 
-pub fn create_pieces() -> Vec<Piece> {
+fn create_pieces() -> Vec<Piece> {
     let mut pieces = Vec::new();
 
     let mut shapes = Vec::new();
@@ -71,14 +85,14 @@ pub fn create_pieces() -> Vec<Piece> {
     pieces
 }
 
-pub fn create_current_piece(pieces: &Vec<Piece>) -> Piece {
+fn create_current_piece(pieces: &Vec<Piece>) -> Piece {
     // let mut rng = thread_rng();
     // let len = pieces.len() - 1;
     // let i = rng.gen_range(0..len);
     pieces[0].clone()
 }
 
-pub fn move_current_piece(
+fn move_current_piece(
     x: usize,
     y: usize,
     play_area: &Vec<Vec<Bloxel>>,
@@ -116,7 +130,30 @@ pub fn move_current_piece(
     legal_move
 }
 
-pub fn create_play_area(x: u16, y: u16, bg_color: Color) -> Vec<Vec<Bloxel>> {
+fn can_stop_falling(play_area: &Vec<Vec<Bloxel>>, current_piece: &Piece) -> bool {
+    let mut can_stop_falling = false;
+
+    let shape = current_piece.shapes[current_piece.orientation];
+    for x in 0..shape.len() {
+        for y in (0..shape[0].len()).rev() {
+            // println!("{} {}", x, y);
+            if shape[x][y] > 0
+                && (
+                    // at bottom of play area
+                    current_piece.y + y == play_area[0].len() - 1
+                    // bloxel below share is occupied
+                    || play_area[current_piece.x + x][current_piece.y + y + 1].occupied
+                )
+            {
+                can_stop_falling = true;
+                break;
+            }
+        }
+    }
+    can_stop_falling
+}
+
+fn create_play_area(x: u16, y: u16, bg_color: Color) -> Vec<Vec<Bloxel>> {
     let mut play_area = Vec::new();
 
     for _x in 0..x {
@@ -133,7 +170,7 @@ pub fn create_play_area(x: u16, y: u16, bg_color: Color) -> Vec<Vec<Bloxel>> {
     play_area
 }
 
-pub fn create_frame(play_area: &Vec<Vec<Bloxel>>, current_piece: &Piece) -> Vec<Vec<Color>> {
+fn create_frame(play_area: &Vec<Vec<Bloxel>>, current_piece: &Piece) -> Vec<Vec<Color>> {
     let mut frame = Vec::new();
 
     for x in 0..play_area.len() {
@@ -169,7 +206,7 @@ pub fn create_frame(play_area: &Vec<Vec<Bloxel>>, current_piece: &Piece) -> Vec<
     frame
 }
 
-pub fn render_frame(frame: &Vec<Vec<Color>>) -> io::Result<()> {
+fn render_frame(frame: &Vec<Vec<Color>>) -> io::Result<()> {
     // should check and throw error if terminal is smaller than frame
     let mut stdout = io::stdout();
 
