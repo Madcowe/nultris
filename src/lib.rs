@@ -7,7 +7,10 @@ use crossterm::{
     terminal,
 };
 use rand::prelude::*;
-use std::io::{self, Write};
+use std::{
+    env::current_dir,
+    io::{self, Write},
+};
 use std::{thread, time};
 
 #[derive(PartialEq, Debug)]
@@ -34,7 +37,7 @@ struct Piece {
 
 pub fn main_loop() -> io::Result<()> {
     // setup, maybe move to own funciton later
-    let play_area = create_play_area(10, 20, crossterm::style::Color::Rgb { r: 0, g: 0, b: 0 });
+    let mut play_area = create_play_area(10, 20, crossterm::style::Color::Rgb { r: 0, g: 0, b: 0 });
     let pieces = create_pieces();
     let mut current_piece = create_current_piece(&pieces);
     let mut next_game_action = NextGameAction::Move;
@@ -47,6 +50,7 @@ pub fn main_loop() -> io::Result<()> {
         let frame = create_frame(&play_area, &current_piece);
         render_frame(&frame)?;
         if next_game_action == NextGameAction::NewPiece {
+            add_shape_to_play_area(&mut play_area, &mut current_piece);
             current_piece = create_current_piece(&pieces);
             next_game_action = NextGameAction::Move;
         }
@@ -90,6 +94,23 @@ fn create_current_piece(pieces: &Vec<Piece>) -> Piece {
     // let len = pieces.len() - 1;
     // let i = rng.gen_range(0..len);
     pieces[0].clone()
+}
+
+fn create_play_area(x: u16, y: u16, bg_color: Color) -> Vec<Vec<Bloxel>> {
+    let mut play_area = Vec::new();
+
+    for _x in 0..x {
+        let mut row = Vec::new();
+        for _y in 0..y {
+            let bloxel = Bloxel {
+                occupied: false,
+                color: bg_color,
+            };
+            row.push(bloxel);
+        }
+        play_area.push(row);
+    }
+    play_area
 }
 
 fn move_current_piece(
@@ -153,21 +174,16 @@ fn can_stop_falling(play_area: &Vec<Vec<Bloxel>>, current_piece: &Piece) -> bool
     can_stop_falling
 }
 
-fn create_play_area(x: u16, y: u16, bg_color: Color) -> Vec<Vec<Bloxel>> {
-    let mut play_area = Vec::new();
-
-    for _x in 0..x {
-        let mut row = Vec::new();
-        for _y in 0..y {
-            let bloxel = Bloxel {
-                occupied: false,
-                color: bg_color,
-            };
-            row.push(bloxel);
+fn add_shape_to_play_area(play_area: &mut Vec<Vec<Bloxel>>, current_piece: &mut Piece) {
+    let shape = current_piece.shapes[current_piece.orientation];
+    for x in 0..shape.len() {
+        for y in 0..shape[0].len() {
+            if shape[x][y] > 0 {
+                play_area[current_piece.x + x][current_piece.y + y].occupied = true;
+                play_area[current_piece.x + x][current_piece.y + y].color = current_piece.color;
+            }
         }
-        play_area.push(row);
     }
-    play_area
 }
 
 fn create_frame(play_area: &Vec<Vec<Bloxel>>, current_piece: &Piece) -> Vec<Vec<Color>> {
