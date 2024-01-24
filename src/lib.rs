@@ -39,22 +39,20 @@ pub fn main_loop() -> io::Result<()> {
     // setup, maybe move to own funciton later
     let mut play_area = create_play_area(10, 20, crossterm::style::Color::Rgb { r: 0, g: 0, b: 0 });
     let pieces = create_pieces();
-    let mut current_piece = create_current_piece(&pieces);
-    let mut next_game_action = NextGameAction::Move;
-    let frame = create_frame(&play_area, &current_piece);
-
+    let (mut current_piece, mut next_game_action) = create_current_piece(&play_area, &pieces);
     // terminal::enable_raw_mode()?;
-    render_frame(&frame)?;
 
     while next_game_action != NextGameAction::GameOver {
         let frame = create_frame(&play_area, &current_piece);
         render_frame(&frame)?;
         if next_game_action == NextGameAction::NewPiece {
             add_shape_to_play_area(&mut play_area, &mut current_piece);
-            current_piece = create_current_piece(&pieces);
-            next_game_action = NextGameAction::Move;
+            (current_piece, next_game_action) = create_current_piece(&play_area, &pieces);
+            if (next_game_action == NextGameAction::GameOver) {
+                break;
+            }
         }
-        let delay = time::Duration::from_millis(500);
+        let delay = time::Duration::from_millis(250);
         thread::sleep(delay);
         let legal_move = move_current_piece(
             current_piece.x,
@@ -89,11 +87,25 @@ fn create_pieces() -> Vec<Piece> {
     pieces
 }
 
-fn create_current_piece(pieces: &Vec<Piece>) -> Piece {
+fn create_current_piece(
+    play_area: &Vec<Vec<Bloxel>>,
+    pieces: &Vec<Piece>,
+) -> (Piece, NextGameAction) {
     // let mut rng = thread_rng();
     // let len = pieces.len() - 1;
     // let i = rng.gen_range(0..len);
-    pieces[0].clone()
+    let piece = pieces[0].clone();
+    let shape = piece.shapes[piece.orientation];
+
+    // if new shape overlaps occupied Bloxel in play area then game over
+    for x in 0..shape.len() {
+        for y in 0..shape[0].len() {
+            if shape[x][y] > 0 && play_area[piece.x + x][piece.y + y].occupied == true {
+                return (piece, NextGameAction::GameOver);
+            }
+        }
+    }
+    (piece, NextGameAction::Move)
 }
 
 fn create_play_area(x: u16, y: u16, bg_color: Color) -> Vec<Vec<Bloxel>> {
