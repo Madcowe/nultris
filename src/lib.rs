@@ -2,7 +2,9 @@
 // #![allow(dead_code)]
 
 use crossterm::{
-    cursor, execute, queue,
+    cursor,
+    event::{poll, read, Event},
+    execute, queue,
     style::{self, Color, Print, SetForegroundColor, Stylize},
     terminal,
 };
@@ -40,7 +42,8 @@ pub fn main_loop() -> io::Result<()> {
     let mut play_area = create_play_area(10, 20, crossterm::style::Color::Rgb { r: 0, g: 0, b: 0 });
     let pieces = create_pieces();
     let (mut current_piece, mut next_game_action) = create_current_piece(&play_area, &pieces);
-    // terminal::enable_raw_mode()?;
+    terminal::enable_raw_mode()?;
+    let delay = time::Duration::from_millis(250);
 
     while next_game_action != NextGameAction::GameOver {
         let frame = create_frame(&play_area, &current_piece);
@@ -48,12 +51,21 @@ pub fn main_loop() -> io::Result<()> {
         if next_game_action == NextGameAction::NewPiece {
             add_shape_to_play_area(&mut play_area, &mut current_piece);
             (current_piece, next_game_action) = create_current_piece(&play_area, &pieces);
-            if (next_game_action == NextGameAction::GameOver) {
+            if next_game_action == NextGameAction::GameOver {
                 break;
             }
         }
-        let delay = time::Duration::from_millis(250);
-        thread::sleep(delay);
+        // thread::sleep(delay);
+        loop {
+            if poll(delay)? {
+                match read()? {
+                    Event::Key(event) => println!("{:?}", event),
+                    _ => (),
+                }
+            } else {
+                break;
+            }
+        }
         let legal_move = move_current_piece(
             current_piece.x,
             current_piece.y + 1,
@@ -65,7 +77,7 @@ pub fn main_loop() -> io::Result<()> {
         }
         println!("{:?}", next_game_action);
     }
-    // terminal::disable_raw_mode()?;
+    terminal::disable_raw_mode()?;
     Ok(())
 }
 
