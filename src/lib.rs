@@ -3,14 +3,14 @@
 
 use crossterm::{
     cursor,
-    event::{poll, read, Event, KeyCode},
+    event::{self, poll, read, Event, KeyCode},
     execute, queue,
     style::{self, Color, Print, SetForegroundColor, Stylize},
     terminal,
 };
 use rand::prelude::*;
 use std::{
-    env::current_dir,
+    env::{current_dir, current_exe},
     io::{self, Write},
 };
 use std::{thread, time};
@@ -50,12 +50,47 @@ pub fn main_loop() -> io::Result<()> {
     loop {
         let frame = create_frame(&play_area, &current_piece);
         render_frame(&frame)?;
+        let mut legal_move = true;
         if poll(delay)? {
             if let Event::Key(event) = read()? {
-                if let KeyCode::Char(c) = event.code {
-                    if c == 'q' {
-                        break;
+                match event.code {
+                    KeyCode::Char(c) => {
+                        if c == 'q' {
+                            break;
+                        }
                     }
+                    // below could be redone with varaoble for x and y getting set
+                    // and then just one call to move_current_piece at end
+                    KeyCode::Left => {
+                        if current_piece.x > 0 {
+                            legal_move = move_current_piece(
+                                current_piece.x - 1,
+                                current_piece.y,
+                                &play_area,
+                                &mut current_piece,
+                            )
+                        }
+                    }
+                    KeyCode::Right => {
+                        legal_move = move_current_piece(
+                            current_piece.x + 1,
+                            current_piece.y,
+                            &play_area,
+                            &mut current_piece,
+                        )
+                    }
+                    KeyCode::Down => {
+                        legal_move = move_current_piece(
+                            current_piece.x,
+                            current_piece.y + 1,
+                            &play_area,
+                            &mut current_piece,
+                        );
+                        if can_stop_falling(&play_area, &current_piece) {
+                            next_game_action = NextGameAction::NewPiece;
+                        }
+                    }
+                    _ => (),
                 }
             }
         }
@@ -66,7 +101,7 @@ pub fn main_loop() -> io::Result<()> {
                 (current_piece, next_game_action) = create_current_piece(&play_area, &pieces);
             }
             NextGameAction::Move => {
-                let legal_move = move_current_piece(
+                legal_move = move_current_piece(
                     current_piece.x,
                     current_piece.y + 1,
                     &play_area,
@@ -93,35 +128,6 @@ pub fn main_loop() -> io::Result<()> {
     terminal::disable_raw_mode()?;
     Ok(())
 }
-// while next_game_action != NextGameAction::GameOver {
-//     let frame = create_frame(&play_area, &current_piece);
-//     render_frame(&frame)?;
-//     if next_game_action == NextGameAction::NewPiece {
-//         if next_game_action == NextGameAction::GameOver {
-//             break;
-//         }
-//     }
-//     // thread::sleep(delay);
-//     loop {
-//         if poll(delay)? {
-//             match read()? {
-//                 Event::Key(event) => match event.code {
-//                     crossterm::event::KeyCode::Char(c) => {
-//                         println!("{}", c);
-//                         if c == 'q' {
-//                             thread
-//                         }
-//                     }
-//                     _ => (),
-//                 },
-//                 _ => (),
-//             }
-//         } else {
-//             break;
-//         }
-//     }
-//     println!("{:?}", next_game_action);
-// }
 
 fn create_pieces() -> Vec<Piece> {
     let mut pieces = Vec::new();
