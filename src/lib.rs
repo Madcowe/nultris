@@ -3,7 +3,7 @@
 
 use crossterm::{
     cursor,
-    event::{poll, read, Event},
+    event::{poll, read, Event, KeyCode},
     execute, queue,
     style::{self, Color, Print, SetForegroundColor, Stylize},
     terminal,
@@ -20,6 +20,7 @@ enum NextGameAction {
     Move,
     NewPiece,
     GameOver,
+    Quit,
 }
 
 #[derive(Debug)]
@@ -45,38 +46,66 @@ pub fn main_loop() -> io::Result<()> {
     terminal::enable_raw_mode()?;
     let delay = time::Duration::from_millis(250);
 
-    while next_game_action != NextGameAction::GameOver {
+    // When quit button is pressed quit the game
+    loop {
         let frame = create_frame(&play_area, &current_piece);
         render_frame(&frame)?;
-        if next_game_action == NextGameAction::NewPiece {
-            add_shape_to_play_area(&mut play_area, &mut current_piece);
-            (current_piece, next_game_action) = create_current_piece(&play_area, &pieces);
-            if next_game_action == NextGameAction::GameOver {
-                break;
-            }
-        }
-        // thread::sleep(delay);
-        loop {
-            if poll(delay)? {
-                match read()? {
-                    Event::Key(event) => println!("{:?}", event),
-                    _ => (),
+        if poll(delay)? {
+            if let Event::Key(event) = read()? {
+                if let KeyCode::Char(c) = event.code {
+                    if c == 'q' {
+                        break;
+                    }
                 }
-            } else {
-                break;
+                // if event.code::char == 'q' {
+                //     println!("Your pressed q!");
+                //     break;
             }
         }
-        let legal_move = move_current_piece(
-            current_piece.x,
-            current_piece.y + 1,
-            &play_area,
-            &mut current_piece,
-        );
-        if legal_move && can_stop_falling(&play_area, &current_piece) {
-            next_game_action = NextGameAction::NewPiece;
-        }
-        println!("{:?}", next_game_action);
     }
+    // When a game comes to an end start a new came
+    // When a piece stop moving create a new piece
+
+    // while next_game_action != NextGameAction::GameOver {
+    //     let frame = create_frame(&play_area, &current_piece);
+    //     render_frame(&frame)?;
+    //     if next_game_action == NextGameAction::NewPiece {
+    //         add_shape_to_play_area(&mut play_area, &mut current_piece);
+    //         (current_piece, next_game_action) = create_current_piece(&play_area, &pieces);
+    //         if next_game_action == NextGameAction::GameOver {
+    //             break;
+    //         }
+    //     }
+    //     // thread::sleep(delay);
+    //     loop {
+    //         if poll(delay)? {
+    //             match read()? {
+    //                 Event::Key(event) => match event.code {
+    //                     crossterm::event::KeyCode::Char(c) => {
+    //                         println!("{}", c);
+    //                         if c == 'q' {
+    //                             thread
+    //                         }
+    //                     }
+    //                     _ => (),
+    //                 },
+    //                 _ => (),
+    //             }
+    //         } else {
+    //             break;
+    //         }
+    //     }
+    //     let legal_move = move_current_piece(
+    //         current_piece.x,
+    //         current_piece.y + 1,
+    //         &play_area,
+    //         &mut current_piece,
+    //     );
+    //     if legal_move && can_stop_falling(&play_area, &current_piece) {
+    //         next_game_action = NextGameAction::NewPiece;
+    //     }
+    //     println!("{:?}", next_game_action);
+    // }
     terminal::disable_raw_mode()?;
     Ok(())
 }
