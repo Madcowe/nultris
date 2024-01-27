@@ -59,7 +59,7 @@ pub fn main_loop() -> io::Result<()> {
                 }
             }
         }
-        // When a game comes to an end start a new came
+        // When a game comes to an end start a new game
         match next_game_action {
             NextGameAction::NewPiece => {
                 add_shape_to_play_area(&mut play_area, &mut current_piece);
@@ -75,6 +75,15 @@ pub fn main_loop() -> io::Result<()> {
                 if legal_move && can_stop_falling(&play_area, &current_piece) {
                     next_game_action = NextGameAction::NewPiece;
                 }
+            }
+            NextGameAction::GameOver => {
+                // game over animation
+                play_area =
+                    create_play_area(10, 20, crossterm::style::Color::Rgb { r: 0, g: 0, b: 0 });
+
+                (current_piece, next_game_action) = create_current_piece(&play_area, &pieces);
+                let restart_delay = time::Duration::from_millis(1000);
+                thread::sleep(restart_delay);
             }
             _ => (),
         }
