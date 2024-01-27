@@ -1,4 +1,4 @@
-- Listen for press of q and quit on it
-- Organise main_loop properly using enum NextGameAction
+- Add function to clear game_area and start a new game
+? Could mail_loop by organised better 
 ? Does occupied in Bloxel need to become an u8 rather than bool to match up with shapes in Piece?
 ? How do you stop user scrolling up terminal and seeing old frames

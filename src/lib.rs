@@ -57,58 +57,62 @@ pub fn main_loop() -> io::Result<()> {
                         break;
                     }
                 }
-                // if event.code::char == 'q' {
-                //     println!("Your pressed q!");
-                //     break;
             }
         }
+        // When a game comes to an end start a new came
+        match next_game_action {
+            NextGameAction::NewPiece => {
+                add_shape_to_play_area(&mut play_area, &mut current_piece);
+                (current_piece, next_game_action) = create_current_piece(&play_area, &pieces);
+            }
+            NextGameAction::Move => {
+                let legal_move = move_current_piece(
+                    current_piece.x,
+                    current_piece.y + 1,
+                    &play_area,
+                    &mut current_piece,
+                );
+                if legal_move && can_stop_falling(&play_area, &current_piece) {
+                    next_game_action = NextGameAction::NewPiece;
+                }
+            }
+            _ => (),
+        }
+        // When a piece stop moving create a new piece
     }
-    // When a game comes to an end start a new came
-    // When a piece stop moving create a new piece
 
-    // while next_game_action != NextGameAction::GameOver {
-    //     let frame = create_frame(&play_area, &current_piece);
-    //     render_frame(&frame)?;
-    //     if next_game_action == NextGameAction::NewPiece {
-    //         add_shape_to_play_area(&mut play_area, &mut current_piece);
-    //         (current_piece, next_game_action) = create_current_piece(&play_area, &pieces);
-    //         if next_game_action == NextGameAction::GameOver {
-    //             break;
-    //         }
-    //     }
-    //     // thread::sleep(delay);
-    //     loop {
-    //         if poll(delay)? {
-    //             match read()? {
-    //                 Event::Key(event) => match event.code {
-    //                     crossterm::event::KeyCode::Char(c) => {
-    //                         println!("{}", c);
-    //                         if c == 'q' {
-    //                             thread
-    //                         }
-    //                     }
-    //                     _ => (),
-    //                 },
-    //                 _ => (),
-    //             }
-    //         } else {
-    //             break;
-    //         }
-    //     }
-    //     let legal_move = move_current_piece(
-    //         current_piece.x,
-    //         current_piece.y + 1,
-    //         &play_area,
-    //         &mut current_piece,
-    //     );
-    //     if legal_move && can_stop_falling(&play_area, &current_piece) {
-    //         next_game_action = NextGameAction::NewPiece;
-    //     }
-    //     println!("{:?}", next_game_action);
-    // }
     terminal::disable_raw_mode()?;
     Ok(())
 }
+// while next_game_action != NextGameAction::GameOver {
+//     let frame = create_frame(&play_area, &current_piece);
+//     render_frame(&frame)?;
+//     if next_game_action == NextGameAction::NewPiece {
+//         if next_game_action == NextGameAction::GameOver {
+//             break;
+//         }
+//     }
+//     // thread::sleep(delay);
+//     loop {
+//         if poll(delay)? {
+//             match read()? {
+//                 Event::Key(event) => match event.code {
+//                     crossterm::event::KeyCode::Char(c) => {
+//                         println!("{}", c);
+//                         if c == 'q' {
+//                             thread
+//                         }
+//                     }
+//                     _ => (),
+//                 },
+//                 _ => (),
+//             }
+//         } else {
+//             break;
+//         }
+//     }
+//     println!("{:?}", next_game_action);
+// }
 
 fn create_pieces() -> Vec<Piece> {
     let mut pieces = Vec::new();
