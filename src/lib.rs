@@ -59,13 +59,14 @@ pub fn main_loop() -> io::Result<()> {
                             break;
                         }
                     }
-                    // below could be redone with varaoble for x and y getting set
+                    // below could be redone with variable for x and y getting set
                     // and then just one call to move_current_piece at end
                     KeyCode::Left => {
                         if current_piece.x > 0 {
                             legal_move = move_current_piece(
                                 current_piece.x - 1,
                                 current_piece.y,
+                                current_piece.orientation,
                                 &play_area,
                                 &mut current_piece,
                             )
@@ -75,6 +76,21 @@ pub fn main_loop() -> io::Result<()> {
                         legal_move = move_current_piece(
                             current_piece.x + 1,
                             current_piece.y,
+                            current_piece.orientation,
+                            &play_area,
+                            &mut current_piece,
+                        )
+                    }
+                    KeyCode::Up => {
+                        // if not at end of shapes then orientation + 1 other wise set to 0
+                        let mut orientation = 0;
+                        if current_piece.orientation < current_piece.shapes.len() - 1 {
+                            orientation = current_piece.orientation + 1;
+                        }
+                        legal_move = move_current_piece(
+                            current_piece.x,
+                            current_piece.y,
+                            orientation,
                             &play_area,
                             &mut current_piece,
                         )
@@ -83,6 +99,7 @@ pub fn main_loop() -> io::Result<()> {
                         legal_move = move_current_piece(
                             current_piece.x,
                             current_piece.y + 1,
+                            current_piece.orientation,
                             &play_area,
                             &mut current_piece,
                         );
@@ -104,6 +121,7 @@ pub fn main_loop() -> io::Result<()> {
                 legal_move = move_current_piece(
                     current_piece.x,
                     current_piece.y + 1,
+                    current_piece.orientation,
                     &play_area,
                     &mut current_piece,
                 );
@@ -133,7 +151,13 @@ fn create_pieces() -> Vec<Piece> {
     let mut pieces = Vec::new();
 
     let mut shapes = Vec::new();
-    let shape: [[u8; 4]; 4] = [[1, 1, 1, 0], [1, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]];
+    let mut shape: [[u8; 4]; 4] = [[1, 1, 1, 0], [1, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]];
+    shapes.push(shape);
+    shape = [[1, 0, 0, 0], [1, 0, 0, 0], [1, 1, 0, 0], [0, 0, 0, 0]];
+    shapes.push(shape);
+    shape = [[0, 0, 1, 0], [1, 1, 1, 0], [0, 0, 0, 0], [0, 0, 0, 0]];
+    shapes.push(shape);
+    shape = [[1, 1, 0, 0], [0, 1, 0, 0], [0, 1, 0, 0], [0, 0, 0, 0]];
     shapes.push(shape);
     let piece: Piece = Piece {
         x: 4,
@@ -188,6 +212,7 @@ fn create_play_area(x: u16, y: u16, bg_color: Color) -> Vec<Vec<Bloxel>> {
 fn move_current_piece(
     x: usize,
     y: usize,
+    orientation: usize,
     play_area: &Vec<Vec<Bloxel>>,
     current_piece: &mut Piece,
 ) -> bool {
@@ -196,7 +221,7 @@ fn move_current_piece(
     let max_y = play_area[0].len();
     {
         let (mut x, mut y) = (x, y);
-        let shape = current_piece.shapes[current_piece.orientation];
+        let shape = current_piece.shapes[orientation];
         for column in shape {
             for occupied in column {
                 if ((x >= max_x || y >= max_y) && occupied > 0)
@@ -219,6 +244,7 @@ fn move_current_piece(
     if legal_move {
         current_piece.x = x;
         current_piece.y = y;
+        current_piece.orientation = orientation;
     }
     legal_move
 }
