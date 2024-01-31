@@ -50,7 +50,8 @@ pub fn main_loop() -> io::Result<()> {
     loop {
         let frame = create_frame(&play_area, &current_piece);
         render_frame(&frame)?;
-        let mut legal_move = true;
+        let (mut x, mut y, mut orientation) =
+            (current_piece.x, current_piece.y, current_piece.orientation);
         if poll(delay)? {
             if let Event::Key(event) = read()? {
                 match event.code {
@@ -59,57 +60,31 @@ pub fn main_loop() -> io::Result<()> {
                             break;
                         }
                     }
-                    // below could be redone with variable for x and y getting set
-                    // and then just one call to move_current_piece at end
                     KeyCode::Left => {
                         if current_piece.x > 0 {
-                            legal_move = move_current_piece(
-                                current_piece.x - 1,
-                                current_piece.y,
-                                current_piece.orientation,
-                                &play_area,
-                                &mut current_piece,
-                            )
+                            x = current_piece.x - 1;
                         }
                     }
                     KeyCode::Right => {
-                        legal_move = move_current_piece(
-                            current_piece.x + 1,
-                            current_piece.y,
-                            current_piece.orientation,
-                            &play_area,
-                            &mut current_piece,
-                        )
+                        x = current_piece.x + 1;
                     }
                     KeyCode::Up => {
                         // if not at end of shapes then orientation + 1 other wise set to 0
-                        let mut orientation = 0;
+                        orientation = 0;
                         if current_piece.orientation < current_piece.shapes.len() - 1 {
                             orientation = current_piece.orientation + 1;
                         }
-                        legal_move = move_current_piece(
-                            current_piece.x,
-                            current_piece.y,
-                            orientation,
-                            &play_area,
-                            &mut current_piece,
-                        )
                     }
                     KeyCode::Down => {
-                        legal_move = move_current_piece(
-                            current_piece.x,
-                            current_piece.y + 1,
-                            current_piece.orientation,
-                            &play_area,
-                            &mut current_piece,
-                        );
-                        if can_stop_falling(&play_area, &current_piece) {
-                            next_game_action = NextGameAction::NewPiece;
-                        }
+                        y = current_piece.y + 1;
                     }
                     _ => (),
                 }
             }
+        }
+        let mut can_stop = move_current_piece(x, y, orientation, &play_area, &mut current_piece);
+        if can_stop {
+            next_game_action = NextGameAction::NewPiece;
         }
         // When a game comes to an end start a new game
         match next_game_action {
@@ -118,14 +93,14 @@ pub fn main_loop() -> io::Result<()> {
                 (current_piece, next_game_action) = create_current_piece(&play_area, &pieces);
             }
             NextGameAction::Move => {
-                legal_move = move_current_piece(
+                can_stop = move_current_piece(
                     current_piece.x,
                     current_piece.y + 1,
                     current_piece.orientation,
                     &play_area,
                     &mut current_piece,
                 );
-                if legal_move && can_stop_falling(&play_area, &current_piece) {
+                if can_stop {
                     next_game_action = NextGameAction::NewPiece;
                 }
             }
@@ -216,7 +191,7 @@ fn move_current_piece(
     play_area: &Vec<Vec<Bloxel>>,
     current_piece: &mut Piece,
 ) -> bool {
-    let mut legal_move = true;
+    let mut can_stop = true;
     let max_x = play_area.len();
     let max_y = play_area[0].len();
     let original_y = y;
@@ -231,24 +206,24 @@ fn move_current_piece(
                 {
                     // if occupied co-ordinate outisde play_area or both play area and shape
                     // occupied, move is not legal leave loop as no need to check rest.
-                    legal_move = false;
+                    can_stop = false;
                     break;
                 }
                 y += 1;
             }
-            if legal_move == false {
+            if can_stop == false {
                 break;
             }
             y = original_y;
             x += 1;
         }
     }
-    if legal_move {
+    if can_stop {
         current_piece.x = x;
         current_piece.y = y;
         current_piece.orientation = orientation;
     }
-    legal_move
+    can_stop_falling(&play_area, &current_piece)
 }
 
 fn can_stop_falling(play_area: &Vec<Vec<Bloxel>>, current_piece: &Piece) -> bool {
@@ -257,7 +232,6 @@ fn can_stop_falling(play_area: &Vec<Vec<Bloxel>>, current_piece: &Piece) -> bool
     let shape = current_piece.shapes[current_piece.orientation];
     for x in 0..shape.len() {
         for y in (0..shape[0].len()).rev() {
-            // println!("{} {}", x, y);
             if shape[x][y] > 0
                 && (
                     // at bottom of play area
@@ -296,7 +270,6 @@ fn create_frame(play_area: &Vec<Vec<Bloxel>>, current_piece: &Piece) -> Vec<Vec<
         }
         frame.push(column);
     }
-
     // note this just renders the shape it doesn't check for collision as will be handled beforehand
     let max_x = frame.len();
     let max_y = frame[0].len();
@@ -316,9 +289,6 @@ fn create_frame(play_area: &Vec<Vec<Bloxel>>, current_piece: &Piece) -> Vec<Vec<
         y = current_piece.y;
         x += 1;
     }
-
-    // frame[0][2] = Color::Green;
-
     frame
 }
 
