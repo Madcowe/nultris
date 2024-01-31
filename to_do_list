@@ -1,6 +1,5 @@
 - Create function to check and remove any complete rows each time a piece stops
-Bug - Rotation sometimes cause block to stop when it should still move down
-Bug - Moving shape just before it move to bottom cause array out of bounds in call to can_stop_mining but only in certain orientations
+Bug - Rotation sometimes cause block to stop when it should still move down, seem like check is on previous orientation
 ? Does Legal_move being return from move piece actually needed, should remove if redundent
 ? Could mail_loop by organised better 
 ? Does occupied in Bloxel need to become an u8 rather than bool to match up with shapes in Piece?
