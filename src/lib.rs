@@ -103,43 +103,43 @@ pub fn main_loop() -> io::Result<()> {
                             &play_area,
                             &mut current_piece,
                         );
-                        if can_stop_falling(&play_area, &current_piece) {
-                            next_game_action = NextGameAction::NewPiece;
-                        }
+                        // if can_stop_falling(&play_area, &current_piece) {
+                        //     next_game_action = NextGameAction::NewPiece;
+                        // }
                     }
                     _ => (),
                 }
             }
         }
         // When a game comes to an end start a new game
-        match next_game_action {
-            NextGameAction::NewPiece => {
-                add_shape_to_play_area(&mut play_area, &mut current_piece);
-                (current_piece, next_game_action) = create_current_piece(&play_area, &pieces);
-            }
-            NextGameAction::Move => {
-                legal_move = move_current_piece(
-                    current_piece.x,
-                    current_piece.y + 1,
-                    current_piece.orientation,
-                    &play_area,
-                    &mut current_piece,
-                );
-                if legal_move && can_stop_falling(&play_area, &current_piece) {
-                    next_game_action = NextGameAction::NewPiece;
-                }
-            }
-            NextGameAction::GameOver => {
-                // game over animation
-                play_area =
-                    create_play_area(10, 20, crossterm::style::Color::Rgb { r: 0, g: 0, b: 0 });
+        // match next_game_action {
+        //     NextGameAction::NewPiece => {
+        //         add_shape_to_play_area(&mut play_area, &mut current_piece);
+        //         (current_piece, next_game_action) = create_current_piece(&play_area, &pieces);
+        //     }
+        //     NextGameAction::Move => {
+        //         legal_move = move_current_piece(
+        //             current_piece.x,
+        //             current_piece.y + 1,
+        //             current_piece.orientation,
+        //             &play_area,
+        //             &mut current_piece,
+        //         );
+        //         if legal_move && can_stop_falling(&play_area, &current_piece) {
+        //             next_game_action = NextGameAction::NewPiece;
+        //         }
+        //     }
+        //     NextGameAction::GameOver => {
+        //         // game over animation
+        //         play_area =
+        //             create_play_area(10, 20, crossterm::style::Color::Rgb { r: 0, g: 0, b: 0 });
 
-                (current_piece, next_game_action) = create_current_piece(&play_area, &pieces);
-                let restart_delay = time::Duration::from_millis(1000);
-                thread::sleep(restart_delay);
-            }
-            _ => (),
-        }
+        //         (current_piece, next_game_action) = create_current_piece(&play_area, &pieces);
+        //         let restart_delay = time::Duration::from_millis(1000);
+        //         thread::sleep(restart_delay);
+        //     }
+        //     _ => (),
+        // }
         // When a piece stop moving create a new piece
     }
 
@@ -219,6 +219,8 @@ fn move_current_piece(
     let mut legal_move = true;
     let max_x = play_area.len();
     let max_y = play_area[0].len();
+    let original_y = y;
+    println!("{} {} {} {}", max_x, max_y, x, y);
     {
         let (mut x, mut y) = (x, y);
         let shape = current_piece.shapes[orientation];
@@ -227,7 +229,7 @@ fn move_current_piece(
                 if ((x >= max_x || y >= max_y) && occupied > 0)
                     || (occupied > 0 && play_area[x][y].occupied == true)
                 {
-                    // if ocupied co-ordinate outisde play_area or both play area and shape
+                    // if occupied co-ordinate outisde play_area or both play area and shape
                     // occupied, move is not legal leave loop as no need to check rest.
                     legal_move = false;
                     break;
@@ -237,7 +239,7 @@ fn move_current_piece(
             if legal_move == false {
                 break;
             }
-            y = current_piece.y;
+            y = original_y;
             x += 1;
         }
     }
@@ -341,7 +343,6 @@ fn render_frame(frame: &Vec<Vec<Color>>) -> io::Result<()> {
     }
 
     stdout.flush()?;
-
     Ok(())
 }
 
