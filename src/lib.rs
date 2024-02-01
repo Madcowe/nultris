@@ -15,13 +15,6 @@ use std::{
 };
 use std::{thread, time};
 
-#[derive(PartialEq, Debug)]
-enum NextGameAction {
-    Move,
-    NewPiece,
-    GameOver,
-}
-
 #[derive(Debug)]
 struct Bloxel {
     occupied: bool,
@@ -41,7 +34,7 @@ pub fn main_loop() -> io::Result<()> {
     // setup, maybe move to own funciton later
     let mut play_area = create_play_area(10, 20, crossterm::style::Color::Rgb { r: 0, g: 0, b: 0 });
     let pieces = create_pieces();
-    let (mut current_piece, mut next_game_action) = create_current_piece(&play_area, &pieces);
+    let (mut current_piece, mut game_over) = create_current_piece(&play_area, &pieces);
     terminal::enable_raw_mode()?;
     let delay = time::Duration::from_millis(250);
 
@@ -81,13 +74,13 @@ pub fn main_loop() -> io::Result<()> {
                 }
             }
         }
-        let mut can_stop = move_current_piece(x, y, orientation, &play_area, &mut current_piece);
+        let can_stop = move_current_piece(x, y, orientation, &play_area, &mut current_piece);
         // if a piece stops moving create a new piece else move down
         if can_stop {
             add_shape_to_play_area(&mut play_area, &mut current_piece);
-            (current_piece, next_game_action) = create_current_piece(&play_area, &pieces);
+            (current_piece, game_over) = create_current_piece(&play_area, &pieces);
         } else {
-            can_stop = move_current_piece(
+            _ = move_current_piece(
                 current_piece.x,
                 current_piece.y + 1,
                 current_piece.orientation,
@@ -96,11 +89,12 @@ pub fn main_loop() -> io::Result<()> {
             );
         }
         // When a game comes to an end start a new game
-        if next_game_action == NextGameAction::GameOver {
+        if game_over {
             // game over animation
             play_area = create_play_area(10, 20, crossterm::style::Color::Rgb { r: 0, g: 0, b: 0 });
 
-            (current_piece, next_game_action) = create_current_piece(&play_area, &pieces);
+            (current_piece, game_over) = create_current_piece(&play_area, &pieces);
+            // this pauses but imput loop doesn't?
             let restart_delay = time::Duration::from_millis(1000);
             thread::sleep(restart_delay);
         }
@@ -134,10 +128,7 @@ fn create_pieces() -> Vec<Piece> {
     pieces
 }
 
-fn create_current_piece(
-    play_area: &Vec<Vec<Bloxel>>,
-    pieces: &Vec<Piece>,
-) -> (Piece, NextGameAction) {
+fn create_current_piece(play_area: &Vec<Vec<Bloxel>>, pieces: &Vec<Piece>) -> (Piece, bool) {
     // let mut rng = thread_rng();
     // let len = pieces.len() - 1;
     // let i = rng.gen_range(0..len);
@@ -148,11 +139,11 @@ fn create_current_piece(
     for x in 0..shape.len() {
         for y in 0..shape[0].len() {
             if shape[x][y] > 0 && play_area[piece.x + x][piece.y + y].occupied == true {
-                return (piece, NextGameAction::GameOver);
+                return (piece, true);
             }
         }
     }
-    (piece, NextGameAction::Move)
+    (piece, false)
 }
 
 fn create_play_area(x: u16, y: u16, bg_color: Color) -> Vec<Vec<Bloxel>> {
