@@ -20,7 +20,6 @@ enum NextGameAction {
     Move,
     NewPiece,
     GameOver,
-    Quit,
 }
 
 #[derive(Debug)]
@@ -86,7 +85,7 @@ pub fn main_loop() -> io::Result<()> {
         if can_stop {
             next_game_action = NextGameAction::NewPiece;
         }
-        // When a game comes to an end start a new game
+        // if a piece stops moving create a new piece else move down
         match next_game_action {
             NextGameAction::NewPiece => {
                 add_shape_to_play_area(&mut play_area, &mut current_piece);
@@ -104,18 +103,17 @@ pub fn main_loop() -> io::Result<()> {
                     next_game_action = NextGameAction::NewPiece;
                 }
             }
-            NextGameAction::GameOver => {
-                // game over animation
-                play_area =
-                    create_play_area(10, 20, crossterm::style::Color::Rgb { r: 0, g: 0, b: 0 });
-
-                (current_piece, next_game_action) = create_current_piece(&play_area, &pieces);
-                let restart_delay = time::Duration::from_millis(1000);
-                thread::sleep(restart_delay);
-            }
             _ => (),
         }
-        // When a piece stop moving create a new piece
+        // When a game comes to an end start a new game
+        if next_game_action == NextGameAction::GameOver {
+            // game over animation
+            play_area = create_play_area(10, 20, crossterm::style::Color::Rgb { r: 0, g: 0, b: 0 });
+
+            (current_piece, next_game_action) = create_current_piece(&play_area, &pieces);
+            let restart_delay = time::Duration::from_millis(1000);
+            thread::sleep(restart_delay);
+        }
     }
 
     terminal::disable_raw_mode()?;
@@ -195,7 +193,6 @@ fn move_current_piece(
     let max_x = play_area.len();
     let max_y = play_area[0].len();
     let original_y = y;
-    println!("{} {} {} {}", max_x, max_y, x, y);
     {
         let (mut x, mut y) = (x, y);
         let shape = current_piece.shapes[orientation];

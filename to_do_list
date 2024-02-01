@@ -1,5 +1,6 @@
 - Create function to check and remove any complete rows each time a piece stops
 Bug - Rotation sometimes cause block to stop when it should still move down, seem like check is on previous orientation
+Bug - New game doesn's start when screen full
 ? Does Legal_move being return from move piece actually needed, should remove if redundent
 ? Could mail_loop by organised better 
 ? Does occupied in Bloxel need to become an u8 rather than bool to match up with shapes in Piece?
