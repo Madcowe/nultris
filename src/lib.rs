@@ -82,28 +82,18 @@ pub fn main_loop() -> io::Result<()> {
             }
         }
         let mut can_stop = move_current_piece(x, y, orientation, &play_area, &mut current_piece);
-        if can_stop {
-            next_game_action = NextGameAction::NewPiece;
-        }
         // if a piece stops moving create a new piece else move down
-        match next_game_action {
-            NextGameAction::NewPiece => {
-                add_shape_to_play_area(&mut play_area, &mut current_piece);
-                (current_piece, next_game_action) = create_current_piece(&play_area, &pieces);
-            }
-            NextGameAction::Move => {
-                can_stop = move_current_piece(
-                    current_piece.x,
-                    current_piece.y + 1,
-                    current_piece.orientation,
-                    &play_area,
-                    &mut current_piece,
-                );
-                if can_stop {
-                    next_game_action = NextGameAction::NewPiece;
-                }
-            }
-            _ => (),
+        if can_stop {
+            add_shape_to_play_area(&mut play_area, &mut current_piece);
+            (current_piece, next_game_action) = create_current_piece(&play_area, &pieces);
+        } else {
+            can_stop = move_current_piece(
+                current_piece.x,
+                current_piece.y + 1,
+                current_piece.orientation,
+                &play_area,
+                &mut current_piece,
+            );
         }
         // When a game comes to an end start a new game
         if next_game_action == NextGameAction::GameOver {
