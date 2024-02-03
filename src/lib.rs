@@ -33,9 +33,9 @@ struct Piece {
 pub fn main_loop() -> io::Result<()> {
     // setup, maybe move to own funciton later
     let mut play_area = create_play_area(10, 20, crossterm::style::Color::Rgb { r: 0, g: 0, b: 0 });
+    terminal::enable_raw_mode()?;
     let pieces = create_pieces();
     let (mut current_piece, mut game_over) = create_current_piece(&play_area, &pieces);
-    terminal::enable_raw_mode()?;
     let delay = time::Duration::from_millis(250);
 
     // When quit button is pressed quit the game
@@ -44,6 +44,10 @@ pub fn main_loop() -> io::Result<()> {
         render_frame(&frame)?;
         let (mut x, mut y, mut orientation) =
             (current_piece.x, current_piece.y, current_piece.orientation);
+        // get rid of all previous events so only keys pressed in active play get applied
+        while poll(time::Duration::from_secs(0))? {
+            read()?;
+        }
         if poll(delay)? {
             if let Event::Key(event) = read()? {
                 match event.code {
