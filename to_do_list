@@ -1,4 +1,3 @@
 - Create function to check and remove any complete rows each time a piece stops
 ? Could mail_loop by organised better 
 ? Does occupied in Bloxel need to become an u8 rather than bool to match up with shapes in Piece?
-? How do you stop user scrolling up terminal and seeing old frames

@@ -37,6 +37,8 @@ pub fn main_loop() -> io::Result<()> {
     let pieces = create_pieces();
     let (mut current_piece, mut game_over) = create_current_piece(&play_area, &pieces);
     let delay = time::Duration::from_millis(250);
+    // clear what is currently showing in terminal as render_frame doesn't do this
+    execute!(io::stdout(), terminal::Clear(terminal::ClearType::All))?;
 
     // When quit button is pressed quit the game
     loop {
@@ -278,7 +280,8 @@ fn render_frame(frame: &Vec<Vec<Color>>) -> io::Result<()> {
     // should check and throw error if terminal is smaller than frame
     let mut stdout = io::stdout();
 
-    execute!(stdout, terminal::Clear(terminal::ClearType::All))?;
+    // purge all the history so user can't scroll back this doesn't get rid of stuff initally
+    execute!(stdout, terminal::Clear(terminal::ClearType::Purge))?;
 
     for x in 0..frame.len() {
         let row = &frame[x];
