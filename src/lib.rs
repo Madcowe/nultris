@@ -84,6 +84,7 @@ pub fn main_loop() -> io::Result<()> {
         // if a piece stops moving create a new piece else move down
         if can_stop {
             add_shape_to_play_area(&mut play_area, &mut current_piece);
+            remove_complete_rows(&mut play_area);
             (current_piece, game_over) = create_current_piece(&play_area, &pieces);
         } else {
             _ = move_current_piece(
@@ -242,6 +243,22 @@ fn add_shape_to_play_area(play_area: &mut Vec<Vec<Bloxel>>, current_piece: &mut 
             }
         }
     }
+}
+
+fn remove_complete_rows(play_area: &mut Vec<Vec<Bloxel>>) {
+    let mut complete_rows = Vec::new();
+    for y in 0..play_area[0].len() {
+        let mut total_occupied = 0;
+        for x in 0..play_area.len() {
+            if play_area[x][y].occupied {
+                total_occupied += 1;
+            }
+            if total_occupied == play_area.len() {
+                complete_rows.push(y);
+            }
+        }
+    }
+    eprintln!("{:?}", complete_rows);
 }
 
 fn create_frame(play_area: &Vec<Vec<Bloxel>>, current_piece: &Piece) -> Vec<Vec<Color>> {

@@ -1,3 +1,3 @@
-- Create function to check and remove any complete rows each time a piece stops
+- Modify remove_complete_rows to remove the complete rows it identifies
 ? Could mail_loop by organised better 
 ? Does occupied in Bloxel need to become an u8 rather than bool to match up with shapes in Piece?
