@@ -1,3 +1,4 @@
-- Modify remove_complete_rows to remove the complete rows it identifies
+- Add remaining shapes
+- Increase game speed
 ? Could mail_loop by organised better 
 ? Does occupied in Bloxel need to become an u8 rather than bool to match up with shapes in Piece?
