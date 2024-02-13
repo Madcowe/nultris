@@ -115,6 +115,7 @@ pub fn main_loop() -> io::Result<()> {
 fn create_pieces() -> Vec<Piece> {
     let mut pieces = Vec::new();
 
+    // J tetromino
     let mut shapes = Vec::new();
     let mut shape: [[u8; 4]; 4] = [[1, 1, 1, 0], [1, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]];
     shapes.push(shape);
@@ -124,7 +125,7 @@ fn create_pieces() -> Vec<Piece> {
     shapes.push(shape);
     shape = [[1, 1, 0, 0], [0, 1, 0, 0], [0, 1, 0, 0], [0, 0, 0, 0]];
     shapes.push(shape);
-    let piece: Piece = Piece {
+    let mut piece: Piece = Piece {
         x: 4,
         y: 0,
         color: Color::Rgb { r: 255, g: 0, b: 0 },
@@ -133,6 +134,18 @@ fn create_pieces() -> Vec<Piece> {
     };
     pieces.push(piece);
 
+    // O tetromino
+    shapes = Vec::new();
+    shape = [[1, 1, 0, 0], [1, 1, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]];
+    shapes.push(shape);
+    piece = Piece {
+        x: 4,
+        y: 0,
+        color: Color::Rgb { r: 0, g: 255, b: 0 },
+        shapes,
+        orientation: 0,
+    };
+    pieces.push(piece);
     pieces
 }
 
@@ -140,7 +153,7 @@ fn create_current_piece(play_area: &Vec<Vec<Bloxel>>, pieces: &Vec<Piece>) -> (P
     // let mut rng = thread_rng();
     // let len = pieces.len() - 1;
     // let i = rng.gen_range(0..len);
-    let piece = pieces[0].clone();
+    let piece = pieces[1].clone();
     let shape = piece.shapes[piece.orientation];
 
     // if new shape overlaps occupied Bloxel in play area then game over
@@ -259,7 +272,6 @@ fn remove_complete_rows(play_area: &mut Vec<Vec<Bloxel>>, bg_color: Color) {
             }
         }
     }
-    eprintln!("{:?}", complete_rows);
     for row in complete_rows.into_iter() {
         for y in (0..row + 1).rev() {
             for x in 0..play_area.len() {
