@@ -32,7 +32,11 @@ struct Piece {
 
 pub fn main_loop() -> io::Result<()> {
     // setup, maybe move to own funciton later
-    let bg_color = Color::Rgb { r: 0, g: 0, b: 0 };
+    let bg_color = Color::Rgb {
+        r: 42,
+        g: 33,
+        b: 57,
+    };
     let mut play_area = create_play_area(10, 20, bg_color);
     terminal::enable_raw_mode()?;
     let pieces = create_pieces();
@@ -99,7 +103,7 @@ pub fn main_loop() -> io::Result<()> {
         // When a game comes to an end start a new game
         if game_over {
             // game over animation
-            play_area = create_play_area(10, 20, crossterm::style::Color::Rgb { r: 0, g: 0, b: 0 });
+            play_area = create_play_area(10, 20, bg_color);
 
             (current_piece, game_over) = create_current_piece(&play_area, &pieces);
             // this pauses but imput loop doesn't?
@@ -128,7 +132,34 @@ fn create_pieces() -> Vec<Piece> {
     let mut piece: Piece = Piece {
         x: 4,
         y: 0,
-        color: Color::Rgb { r: 255, g: 0, b: 0 },
+        color: Color::Rgb {
+            r: 205,
+            g: 152,
+            b: 211,
+        },
+        shapes,
+        orientation: 0,
+    };
+    pieces.push(piece);
+
+    // L tetromino
+    shapes = Vec::new();
+    shape = [[1, 1, 1, 0], [0, 0, 1, 0], [0, 0, 0, 0], [0, 0, 0, 0]];
+    shapes.push(shape);
+    shape = [[1, 1, 0, 0], [1, 0, 0, 0], [1, 0, 0, 0], [0, 0, 0, 0]];
+    shapes.push(shape);
+    shape = [[1, 0, 0, 0], [1, 1, 1, 0], [0, 0, 0, 0], [0, 0, 0, 0]];
+    shapes.push(shape);
+    shape = [[0, 1, 0, 0], [0, 1, 0, 0], [1, 1, 0, 0], [0, 0, 0, 0]];
+    shapes.push(shape);
+    piece = Piece {
+        x: 4,
+        y: 0,
+        color: Color::Rgb {
+            r: 115,
+            g: 196,
+            b: 144,
+        },
         shapes,
         orientation: 0,
     };
@@ -141,7 +172,91 @@ fn create_pieces() -> Vec<Piece> {
     piece = Piece {
         x: 4,
         y: 0,
-        color: Color::Rgb { r: 0, g: 255, b: 0 },
+        color: Color::Rgb {
+            r: 221,
+            g: 77,
+            b: 182,
+        },
+        shapes,
+        orientation: 0,
+    };
+    pieces.push(piece);
+
+    // I tetromino
+    shapes = Vec::new();
+    shape = [[1, 1, 1, 1], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]];
+    shapes.push(shape);
+    shape = [[1, 0, 0, 0], [1, 0, 0, 0], [1, 0, 0, 0], [1, 0, 0, 0]];
+    shapes.push(shape);
+    piece = Piece {
+        x: 4,
+        y: 0,
+        color: Color::Rgb {
+            r: 23,
+            g: 21,
+            b: 41,
+        },
+        shapes,
+        orientation: 0,
+    };
+    pieces.push(piece);
+
+    // S tetromino
+    shapes = Vec::new();
+    shape = [[0, 1, 0, 0], [1, 1, 0, 0], [1, 0, 0, 0], [0, 0, 0, 0]];
+    shapes.push(shape);
+    shape = [[1, 1, 0, 0], [0, 1, 1, 0], [0, 0, 0, 0], [0, 0, 0, 0]];
+    shapes.push(shape);
+    piece = Piece {
+        x: 4,
+        y: 0,
+        color: Color::Rgb {
+            r: 82,
+            g: 155,
+            b: 129,
+        },
+        shapes,
+        orientation: 0,
+    };
+    pieces.push(piece);
+
+    // Z tetromino
+    shapes = Vec::new();
+    shape = [[1, 0, 0, 0], [1, 1, 0, 0], [0, 1, 0, 0], [0, 0, 0, 0]];
+    shapes.push(shape);
+    shape = [[0, 1, 1, 0], [1, 1, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]];
+    shapes.push(shape);
+    piece = Piece {
+        x: 4,
+        y: 0,
+        color: Color::Rgb {
+            r: 136,
+            g: 73,
+            b: 128,
+        },
+        shapes,
+        orientation: 0,
+    };
+    pieces.push(piece);
+
+    // T tetromino
+    shapes = Vec::new();
+    shape = [[1, 0, 0, 0], [1, 1, 0, 0], [1, 0, 0, 0], [0, 0, 0, 0]];
+    shapes.push(shape);
+    shape = [[0, 1, 0, 0], [1, 1, 1, 0], [0, 0, 0, 0], [0, 0, 0, 0]];
+    shapes.push(shape);
+    shape = [[0, 1, 0, 0], [1, 1, 0, 0], [0, 1, 0, 0], [0, 0, 0, 0]];
+    shapes.push(shape);
+    shape = [[1, 1, 1, 0], [0, 1, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]];
+    shapes.push(shape);
+    piece = Piece {
+        x: 4,
+        y: 0,
+        color: Color::Rgb {
+            r: 255,
+            g: 167,
+            b: 235,
+        },
         shapes,
         orientation: 0,
     };
