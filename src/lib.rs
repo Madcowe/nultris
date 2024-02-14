@@ -150,10 +150,10 @@ fn create_pieces() -> Vec<Piece> {
 }
 
 fn create_current_piece(play_area: &Vec<Vec<Bloxel>>, pieces: &Vec<Piece>) -> (Piece, bool) {
-    // let mut rng = thread_rng();
-    // let len = pieces.len() - 1;
-    // let i = rng.gen_range(0..len);
-    let piece = pieces[1].clone();
+    let mut rng = thread_rng();
+    let len = pieces.len();
+    let i = rng.gen_range(0..len);
+    let piece = pieces[i].clone();
     let shape = piece.shapes[piece.orientation];
 
     // if new shape overlaps occupied Bloxel in play area then game over
