@@ -3,16 +3,13 @@
 
 use crossterm::{
     cursor,
-    event::{self, poll, read, Event, KeyCode},
+    event::{poll, read, Event, KeyCode},
     execute, queue,
-    style::{self, Color, Print, SetForegroundColor, Stylize},
+    style::{Color, Print, SetForegroundColor},
     terminal,
 };
 use rand::prelude::*;
-use std::{
-    env::{current_dir, current_exe},
-    io::{self, Write},
-};
+use std::io::{self, Write};
 use std::{thread, time};
 
 #[derive(Debug, Clone, Copy)]
@@ -184,9 +181,9 @@ fn create_pieces() -> Vec<Piece> {
 
     // I tetromino
     shapes = Vec::new();
-    shape = [[1, 1, 1, 1], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]];
+    shape = [[0, 0, 0, 0], [1, 1, 1, 1], [0, 0, 0, 0], [0, 0, 0, 0]];
     shapes.push(shape);
-    shape = [[1, 0, 0, 0], [1, 0, 0, 0], [1, 0, 0, 0], [1, 0, 0, 0]];
+    shape = [[0, 1, 0, 0], [0, 1, 0, 0], [0, 1, 0, 0], [0, 1, 0, 0]];
     shapes.push(shape);
     piece = Piece {
         x: 4,
