@@ -20,8 +20,8 @@ struct Bloxel {
 
 #[derive(Debug, Clone)]
 struct Piece {
-    x: usize,
-    y: usize,
+    x: isize,
+    y: isize,
     color: Color,
     shapes: Vec<[[u8; 4]; 4]>,
     orientation: usize,
@@ -271,8 +271,12 @@ fn create_current_piece(play_area: &Vec<Vec<Bloxel>>, pieces: &Vec<Piece>) -> (P
     // if new shape overlaps occupied Bloxel in play area then game over
     for x in 0..shape.len() {
         for y in 0..shape[0].len() {
-            if shape[x][y] > 0 && play_area[piece.x + x][piece.y + y].occupied == true {
-                return (piece, true);
+            // if shape is occpied and within play area then test against play area
+            if shape[x][y] > 0 && piece.x + x as isize >= 0 && piece.y + y as isize >= 0 {
+                let (x, y) = (piece.x as usize + x as usize, piece.y as usize + y as usize);
+                if play_area[x][y].occupied == true {
+                    return (piece, true);
+                }
             }
         }
     }
@@ -297,8 +301,8 @@ fn create_play_area(x: u16, y: u16, bg_color: Color) -> Vec<Vec<Bloxel>> {
 }
 
 fn move_current_piece(
-    x: usize,
-    y: usize,
+    x: isize,
+    y: isize,
     orientation: usize,
     play_area: &Vec<Vec<Bloxel>>,
     current_piece: &mut Piece,
@@ -312,13 +316,17 @@ fn move_current_piece(
         let shape = current_piece.shapes[orientation];
         for column in shape {
             for occupied in column {
-                if ((x >= max_x || y >= max_y) && occupied > 0)
-                    || (occupied > 0 && play_area[x][y].occupied == true)
-                {
-                    // if occupied co-ordinate outisde play_area or both play area and shape
-                    // occupied, move is not legal leave loop as no need to check rest.
-                    can_stop = false;
-                    break;
+                if occupied > 0 && x >= 0 && y >= 0 {
+                    // If shape occupied and not negativley outside play area
+                    let (x, y) = (x as usize, y as usize);
+                    if ((x >= max_x || y >= max_y) && occupied > 0)
+                        || (occupied > 0 && play_area[x][y].occupied == true)
+                    {
+                        // if occupied co-ordinate outisde play_area or both play area and shape
+                        // occupied, move is not legal leave loop as no need to check rest.
+                        can_stop = false;
+                        break;
+                    }
                 }
                 y += 1;
             }
@@ -344,15 +352,15 @@ fn can_stop_falling(play_area: &Vec<Vec<Bloxel>>, current_piece: &Piece) -> bool
     for x in 0..shape.len() {
         for y in (0..shape[0].len()).rev() {
             if shape[x][y] > 0
-                && (
-                    // at bottom of play area
-                    current_piece.y + y == play_area[0].len() - 1
-                    // bloxel below share is occupied
-                    || play_area[current_piece.x + x][current_piece.y + y + 1].occupied
-                )
+                && current_piece.x + x as isize >= 0
+                && current_piece.y + y as isize >= 00
             {
-                can_stop_falling = true;
-                break;
+                let (x, y) = (current_piece.x as usize + x, current_piece.y as usize + y);
+                if y == play_area[0].len() - 1 || play_area[x][y + 1].occupied {
+                    // at bottom of play area or bloxel below shape is occupied
+                    can_stop_falling = true;
+                    break;
+                }
             }
         }
     }
@@ -363,9 +371,14 @@ fn add_shape_to_play_area(play_area: &mut Vec<Vec<Bloxel>>, current_piece: &mut 
     let shape = current_piece.shapes[current_piece.orientation];
     for x in 0..shape.len() {
         for y in 0..shape[0].len() {
-            if shape[x][y] > 0 {
-                play_area[current_piece.x + x][current_piece.y + y].occupied = true;
-                play_area[current_piece.x + x][current_piece.y + y].color = current_piece.color;
+            if shape[x][y] > 0
+                && current_piece.x + x as isize >= 0
+                && current_piece.y + y as isize >= 0
+            {
+                // occupied piece is not negatively ouside playing area
+                let (x, y) = (current_piece.x as usize + x, current_piece.y as usize + y);
+                play_area[x][y].occupied = true;
+                play_area[x][y].color = current_piece.color;
             }
         }
     }
@@ -416,15 +429,14 @@ fn create_frame(play_area: &Vec<Vec<Bloxel>>, current_piece: &Piece) -> Vec<Vec<
     let (mut x, mut y, color) = (current_piece.x, current_piece.y, current_piece.color);
     let shape = current_piece.shapes[current_piece.orientation];
     for column in shape {
-        if x < max_x {
-            // if x co-oridnate is wihtin frame
-            for occupied in column {
-                if y < max_y && occupied > 0 {
-                    // if y co-ordinate wihtin frame and occupied
-                    frame[x][y] = color;
-                }
-                y += 1;
+        for occupied in column {
+            if occupied > 0 && x >= 0 && y >= 0 && x < max_x as isize && y < max_y as isize {
+                // If x, y co-odrinate  occupied and within play area
+                let (x, y) = (x as usize, y as usize);
+                // if y co-ordinate wihtin frame and occupied
+                frame[x][y] = color;
             }
+            y += 1;
         }
         y = current_piece.y;
         x += 1;
