@@ -85,13 +85,8 @@ pub fn main_loop() -> io::Result<()> {
                 }
             }
         }
-        eprint!("x:{} y:{}", x, y);
         let can_stop = move_current_piece(x, y, orientation, &play_area, &mut current_piece);
         // if a piece stops moving create a new piece else move down
-        eprint!(
-            " | {} x:{} y:{}",
-            can_stop, current_piece.x, current_piece.y
-        );
         if can_stop {
             add_shape_to_play_area(&mut play_area, &mut current_piece);
             remove_complete_rows(&mut play_area, bg_color);
@@ -104,10 +99,6 @@ pub fn main_loop() -> io::Result<()> {
                 &play_area,
                 &mut current_piece,
             );
-            eprint!(
-                " | {} x:{} y:{}",
-                can_stop, current_piece.x, current_piece.y
-            );
         }
         // When a game comes to an end start a new game
         if game_over {
@@ -119,7 +110,6 @@ pub fn main_loop() -> io::Result<()> {
             let restart_delay = time::Duration::from_millis(1000);
             thread::sleep(restart_delay);
         }
-        eprintln!("")
     }
 
     terminal::disable_raw_mode()?;
@@ -131,7 +121,7 @@ fn create_pieces() -> Vec<Piece> {
 
     // J tetromino
     let mut shapes = Vec::new();
-    let mut shape: [[u8; 4]; 4] = [[1, 1, 1, 0], [1, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]];
+    let mut shape: [[u8; 4]; 4] = [[0, 0, 0, 0], [1, 1, 1, 0], [1, 0, 0, 0], [0, 0, 0, 0]];
     shapes.push(shape);
     shape = [[1, 0, 0, 0], [1, 0, 0, 0], [1, 1, 0, 0], [0, 0, 0, 0]];
     shapes.push(shape);
@@ -154,13 +144,13 @@ fn create_pieces() -> Vec<Piece> {
 
     // L tetromino
     shapes = Vec::new();
-    shape = [[1, 1, 1, 0], [0, 0, 1, 0], [0, 0, 0, 0], [0, 0, 0, 0]];
-    shapes.push(shape);
-    shape = [[1, 1, 0, 0], [1, 0, 0, 0], [1, 0, 0, 0], [0, 0, 0, 0]];
-    shapes.push(shape);
     shape = [[1, 0, 0, 0], [1, 1, 1, 0], [0, 0, 0, 0], [0, 0, 0, 0]];
     shapes.push(shape);
     shape = [[0, 1, 0, 0], [0, 1, 0, 0], [1, 1, 0, 0], [0, 0, 0, 0]];
+    shapes.push(shape);
+    shape = [[0, 0, 0, 0], [1, 1, 1, 0], [0, 0, 1, 0], [0, 0, 0, 0]];
+    shapes.push(shape);
+    shape = [[0, 1, 1, 0], [0, 1, 0, 0], [0, 1, 0, 0], [0, 0, 0, 0]];
     shapes.push(shape);
     piece = Piece {
         x: 4,
@@ -278,7 +268,7 @@ fn create_current_piece(play_area: &Vec<Vec<Bloxel>>, pieces: &Vec<Piece>) -> (P
     let mut rng = thread_rng();
     let len = pieces.len();
     let i = rng.gen_range(0..len);
-    let piece = pieces[3].clone();
+    let piece = pieces[i].clone();
     let shape = piece.shapes[piece.orientation];
 
     // if new shape overlaps occupied Bloxel in play area then game over

@@ -1,10 +1,3 @@
-Bug - If shape doesn't have any occpied bloxed in leftmost column then can move all the way to the left
-Options 
-	- Uncentre the I shape and it will work but look odd when rotating
-	- Make x, y cordinate bottom right, then interate back from there checking that no occupied cells
-	would be off the screen, this will require modification in loads of places.
-	- Make negative x and y co-ordnates possibe for pieces, will require explicited conversion to
-	to unsigned with to reference vectors after check that it in play area:
 - Inplement j stick controls as per gilrs_playground
 - Increase game speed
 ? Could mail_loop by organised better 
