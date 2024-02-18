@@ -1,4 +1,4 @@
-// An attribute to hide warnings for unused code.
+// An attribute to hide warnings for unused code
 // #![allow(dead_code)]
 
 use crossterm::{
@@ -8,6 +8,7 @@ use crossterm::{
     style::{Color, Print, SetForegroundColor},
     terminal,
 };
+use gilrs::{Axis, EventType, Gilrs};
 use rand::prelude::*;
 use std::{
     io::{self, Write},
@@ -44,6 +45,10 @@ pub fn main_loop() -> io::Result<()> {
     let delay = time::Duration::from_millis(250);
     // clear what is currently showing in terminal as render_frame doesn't do this
     execute!(io::stdout(), terminal::Clear(terminal::ClearType::All))?;
+    let mut gilrs = Gilrs::new().unwrap();
+    let (mut joy_x, mut joy_y); // = (0f32, 0f32);
+    let (mut up_pressed, mut down_pressed, mut left_pressed, mut right_pressed) =
+        (false, false, false, false);
 
     // When quit button is pressed quit the game
     loop {
@@ -51,6 +56,7 @@ pub fn main_loop() -> io::Result<()> {
         render_frame(&frame)?;
         let (mut x, mut y, mut orientation) =
             (current_piece.x, current_piece.y, current_piece.orientation);
+        // Keyboard controls
         // get rid of all previous events so only keys pressed in active play get applied
         while poll(time::Duration::from_secs(0))? {
             read()?;
@@ -64,9 +70,7 @@ pub fn main_loop() -> io::Result<()> {
                         }
                     }
                     KeyCode::Left => {
-                        // if current_piece.x > 0 {
                         x = current_piece.x - 1;
-                        // }
                     }
                     KeyCode::Right => {
                         x = current_piece.x + 1;
@@ -80,6 +84,46 @@ pub fn main_loop() -> io::Result<()> {
                     }
                     KeyCode::Down => {
                         y = current_piece.y + 1;
+                    }
+                    _ => (),
+                }
+            }
+        }
+        // joystick controls
+        while let Some(gilrs::Event { id, event, time }) = gilrs.next_event() {
+            if let EventType::AxisChanged(axis, position, _) = event {
+                // eprintln!("{:?} {} joy_x: {} joy_y: {}", axis, position, joy_x, joy_y);
+                match axis {
+                    Axis::LeftStickX => {
+                        joy_x = position;
+                        if joy_x > 0.5 && !right_pressed {
+                            x = current_piece.x + 1;
+                            right_pressed = true
+                        } else if joy_x <= 0.5 && right_pressed {
+                            right_pressed = false;
+                        } else if joy_x < -0.5 && !left_pressed {
+                            x = current_piece.x - 1;
+                            left_pressed = true;
+                        } else if joy_x >= -0.5 && left_pressed {
+                            left_pressed = false;
+                        }
+                    }
+                    Axis::LeftStickY => {
+                        joy_y = position;
+                        if joy_y > 0.5 && !up_pressed {
+                            orientation = 0;
+                            if current_piece.orientation < current_piece.shapes.len() - 1 {
+                                orientation = current_piece.orientation + 1;
+                            }
+                            up_pressed = true;
+                        } else if joy_y <= 0.5 && up_pressed {
+                            up_pressed = false;
+                        } else if joy_y < -0.5 && !down_pressed {
+                            y = current_piece.y + 1;
+                            down_pressed = true;
+                        } else if joy_y >= -0.5 && down_pressed {
+                            down_pressed = false;
+                        }
                     }
                     _ => (),
                 }
