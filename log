@@ -1,0 +1,15 @@
+   Compiling nultris v0.1.0 (/home/lab/Development/rust/projects/nultris)
+warning: unused variable: `i`
+   --> src/lib.rs:280:9
+    |
+280 |     let i = rng.gen_range(0..len);
+    |         ^ help: if this is intentional, prefix it with an underscore: `_i`
+    |
+    = note: `#[warn(unused_variables)]` on by default
+
+warning: `nultris` (lib) generated 1 warning (run `cargo fix --lib -p nultris` to apply 1 suggestion)
+    Finished dev [unoptimized + debuginfo] target(s) in 0.23s
+     Running `target/debug/nultris`
+x:4 y:0thread 'main' panicked at src/lib.rs:330:28:
+index out of bounds: the len is 4 but the index is 4
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

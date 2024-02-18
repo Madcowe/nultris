@@ -85,8 +85,13 @@ pub fn main_loop() -> io::Result<()> {
                 }
             }
         }
+        eprint!("x:{} y:{}", x, y);
         let can_stop = move_current_piece(x, y, orientation, &play_area, &mut current_piece);
         // if a piece stops moving create a new piece else move down
+        eprint!(
+            " | {} x:{} y:{}",
+            can_stop, current_piece.x, current_piece.y
+        );
         if can_stop {
             add_shape_to_play_area(&mut play_area, &mut current_piece);
             remove_complete_rows(&mut play_area, bg_color);
@@ -99,6 +104,10 @@ pub fn main_loop() -> io::Result<()> {
                 &play_area,
                 &mut current_piece,
             );
+            eprint!(
+                " | {} x:{} y:{}",
+                can_stop, current_piece.x, current_piece.y
+            );
         }
         // When a game comes to an end start a new game
         if game_over {
@@ -110,6 +119,7 @@ pub fn main_loop() -> io::Result<()> {
             let restart_delay = time::Duration::from_millis(1000);
             thread::sleep(restart_delay);
         }
+        eprintln!("")
     }
 
     terminal::disable_raw_mode()?;
@@ -313,43 +323,30 @@ fn move_current_piece(
     let mut can_move = true;
     let max_x = play_area.len();
     let max_y = play_area[0].len();
-    let original_y = y;
-    {
-        let (mut x, mut y) = (x, y);
-        let shape = current_piece.shapes[orientation];
-        for column in shape {
-            for occupied in column {
-                // if occupied bit of shape outside of play area can_move is false
-                if occupied > 0 && (x < 0 || y < 0 || x >= max_x as isize || y >= max_y as isize) {
+    let (origin_x, origin_y) = (x, y);
+    let shape = current_piece.shapes[orientation];
+    for x in 0..shape.len() {
+        for y in 0..shape[0].len() {
+            let occupied = shape[x][y];
+            let (x, y) = (origin_x + x as isize, origin_y + y as isize);
+            // if occupied bit of shape outside of play area can_move is false
+            if occupied > 0 && (x < 0 || y < 0 || x >= max_x as isize || y >= max_y as isize) {
+                can_move = false;
+                break;
+            // if occupied bit of shape within play area
+            } else if occupied > 0 && x >= 0 && y >= 0 && x < max_x as isize && y < max_y as isize {
+                let (x, y) = (x as usize, y as usize);
+                // and that bit of play area is already occupied then can_move is false
+                if play_area[x][y].occupied {
                     can_move = false;
                     break;
-                // if occupied bit of shape within play area
-                } else if occupied > 0
-                    && current_piece.x + x >= 0
-                    && current_piece.y + y >= 0
-                    && current_piece.x + x < max_x as isize
-                    && current_piece.y + y < max_y as isize
-                {
-                    let (x, y) = (
-                        current_piece.x as usize + x as usize,
-                        current_piece.y as usize + y as usize,
-                    );
-                    // and that bit of play area is already occupied then can_move is false
-                    if play_area[x][y].occupied {
-                        can_move = false;
-                        break;
-                    }
                 }
-                y += 1;
             }
-            if can_move == false {
-                break;
-            }
-            y = original_y;
-            x += 1;
+        }
+        if can_move == false {
+            break;
         }
     }
-    eprintln!("{} {}:{}", can_move, x, y);
     if can_move {
         current_piece.x = x;
         current_piece.y = y;
@@ -360,19 +357,24 @@ fn move_current_piece(
 
 fn can_stop_falling(play_area: &Vec<Vec<Bloxel>>, current_piece: &Piece) -> bool {
     let mut can_stop_falling = false;
+    let max_x = play_area.len();
+    let max_y = play_area[0].len();
 
     let shape = current_piece.shapes[current_piece.orientation];
     for x in 0..shape.len() {
         for y in (0..shape[0].len()).rev() {
+            // if shape bit occupied and bit within play_area
             if shape[x][y] > 0
                 && current_piece.x + x as isize >= 0
                 && current_piece.y + y as isize >= 0
+                && (current_piece.x + x as isize) < max_x as isize
+                && (current_piece.y + y as isize) < max_y as isize
             {
                 let (x, y) = (
                     (current_piece.x + x as isize) as usize,
                     (current_piece.y + y as isize) as usize,
                 );
-                if y == play_area[0].len() - 1 || play_area[x][y + 1].occupied {
+                if y == max_y - 1 || play_area[x][y + 1].occupied {
                     // at bottom of play area or bloxel below shape is occupied
                     can_stop_falling = true;
                     break;
@@ -392,7 +394,10 @@ fn add_shape_to_play_area(play_area: &mut Vec<Vec<Bloxel>>, current_piece: &mut 
                 && current_piece.y + y as isize >= 0
             {
                 // occupied piece is not negatively ouside playing area
-                let (x, y) = (current_piece.x as usize + x, current_piece.y as usize + y);
+                let (x, y) = (
+                    (current_piece.x + x as isize) as usize,
+                    (current_piece.y + y as isize) as usize,
+                );
                 play_area[x][y].occupied = true;
                 play_area[x][y].color = current_piece.color;
             }
