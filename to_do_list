@@ -1,4 +1,14 @@
-- Inplement j stick controls as per gilrs_playground
+1 - Nultris program
+- Move setup (ie make shapes bit espcially) into own module.
+- Make file and input process for config, ie serial connection, colours and bloxel mapping
 - Increase game speed
-? Could mail_loop by organised better 
-? Does occupied in Bloxel need to become an u8 rather than bool to match up with shapes in Piece?
+- Game start add some kind of button press to start game
+- Add N - U - L - T - Y animation at start of each game
+- Add animations for removing rows and game over
+- Prorbabyl put animation data in own module or possibley import file.
+
+- Communication library for pc
+Start libary for sending frames to teensey
+
+- Teensey code for interpeting data sent
+Start teensy code for recieving frames
