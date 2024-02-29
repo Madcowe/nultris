@@ -1,15 +1,28 @@
-   Compiling nultris v0.1.0 (/home/lab/Development/rust/projects/nultris)
-warning: unused variable: `i`
-   --> src/lib.rs:280:9
+warning: unused variable: `id`
+   --> src/lib.rs:101:39
     |
-280 |     let i = rng.gen_range(0..len);
-    |         ^ help: if this is intentional, prefix it with an underscore: `_i`
+101 |         while let Some(gilrs::Event { id, event, time }) = gilrs.next_event() {
+    |                                       ^^ help: try ignoring the field: `id: _`
     |
     = note: `#[warn(unused_variables)]` on by default
 
-warning: `nultris` (lib) generated 1 warning (run `cargo fix --lib -p nultris` to apply 1 suggestion)
-    Finished dev [unoptimized + debuginfo] target(s) in 0.23s
+warning: unused variable: `time`
+   --> src/lib.rs:101:50
+    |
+101 |         while let Some(gilrs::Event { id, event, time }) = gilrs.next_event() {
+    |                                                  ^^^^ help: try ignoring the field: `time: _`
+
+warning: variable does not need to be mutable
+  --> src/lib.rs:37:9
+   |
+37 |     let mut teensy_connected = match port {
+   |         ----^^^^^^^^^^^^^^^^
+   |         |
+   |         help: remove this `mut`
+   |
+   = note: `#[warn(unused_mut)]` on by default
+
+warning: `nultris` (lib) generated 3 warnings (run `cargo fix --lib -p nultris` to apply 3 suggestions)
+    Finished dev [unoptimized + debuginfo] target(s) in 0.02s
      Running `target/debug/nultris`
-x:4 y:0thread 'main' panicked at src/lib.rs:330:28:
-index out of bounds: the len is 4 but the index is 4
-note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+true

@@ -7,6 +7,8 @@ use crossterm::{
 };
 use gilrs::{Axis, EventType, Gilrs};
 use rand::prelude::*;
+use serialport;
+use std::time::Duration;
 use std::{
     io::{self, Write},
     isize,
@@ -29,6 +31,15 @@ struct Piece {
 }
 
 pub fn main_loop() -> io::Result<()> {
+    let port = serialport::new("/dev/ttyACM0", 115_200)
+        .timeout(Duration::from_millis(10))
+        .open();
+    let mut teensy_connected = match port {
+        Ok(_) => true,
+        Err(_) => false,
+    };
+    eprintln!("{}", teensy_connected);
+    // .expect("Failed to open port");
     // setup, maybe move to own funciton later
     let bg_color = Color::Rgb {
         r: 42,
