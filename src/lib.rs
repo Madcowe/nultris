@@ -1,5 +1,5 @@
 use crossterm::{
-    cursor,
+    cursor::{self, SetCursorStyle},
     event::{poll, read, Event, KeyCode},
     execute, queue,
     style::{Color, Print, SetForegroundColor},
@@ -7,12 +7,12 @@ use crossterm::{
 };
 use gilrs::{Axis, EventType, Gilrs};
 use rand::prelude::*;
-use serialport;
-use std::time::Duration;
+use serialport::{self, SerialPort, SerialPortBuilder};
 use std::{
-    io::{self, Write},
+    io::{self, Bytes, Write},
     isize,
 };
+use std::{ops::Add, time::Duration};
 use std::{thread, time};
 
 #[derive(Debug, Clone, Copy)]
@@ -30,14 +30,21 @@ struct Piece {
     orientation: usize,
 }
 
+fn send_teensy_frame(teensy_frame: &Vec<u8>, port: &mut Box<dyn SerialPort>) {
+    // for byte in teensy_frame {
+    port.write(teensy_frame).expect("Write failed!");
+    // }
+}
+
 pub fn main_loop() -> io::Result<()> {
+    let mut teensy_connected = false;
     let port = serialport::new("/dev/ttyACM0", 115_200)
         .timeout(Duration::from_millis(10))
         .open();
-    let mut teensy_connected = match port {
-        Ok(_) => true,
-        Err(_) => false,
-    };
+    if let Ok(_) = port {
+        teensy_connected = true;
+    }
+    let mut port = port.unwrap();
     eprintln!("{}", teensy_connected);
     // .expect("Failed to open port");
     // setup, maybe move to own funciton later
@@ -61,6 +68,10 @@ pub fn main_loop() -> io::Result<()> {
     // When quit button is pressed quit the game
     loop {
         let frame = create_frame(&play_area, &current_piece);
+        if teensy_connected {
+            let teensy_frame = create_teensy_frame(&frame);
+            send_teensy_frame(&teensy_frame, &mut port);
+        }
         render_frame(&frame)?;
         let (mut x, mut y, mut orientation) =
             (current_piece.x, current_piece.y, current_piece.orientation);
@@ -162,6 +173,7 @@ pub fn main_loop() -> io::Result<()> {
             let restart_delay = time::Duration::from_millis(1000);
             thread::sleep(restart_delay);
         }
+        break (); // only do one loop while testing sending to teensy
     }
 
     terminal::disable_raw_mode()?;
@@ -359,6 +371,23 @@ fn create_frame(play_area: &Vec<Vec<Bloxel>>, current_piece: &Piece) -> Vec<Vec<
     frame
 }
 
+fn create_teensy_frame(frame: &Vec<Vec<Color>>) -> Vec<u8> {
+    let mut teensy_frame = Vec::new();
+    for column in frame {
+        for color in column {
+            match color {
+                Color::Rgb { r, g, b } => {
+                    teensy_frame.push(*r);
+                    teensy_frame.push(*g);
+                    teensy_frame.push(*b);
+                }
+                _ => (),
+            }
+        }
+    }
+    teensy_frame
+}
+
 fn render_frame(frame: &Vec<Vec<Color>>) -> io::Result<()> {
     // should check and throw error if terminal is smaller than frame
     let mut stdout = io::stdout();
@@ -379,7 +408,6 @@ fn render_frame(frame: &Vec<Vec<Color>>) -> io::Result<()> {
             )?;
         }
     }
-
     stdout.flush()?;
     Ok(())
 }

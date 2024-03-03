@@ -1,14 +1,12 @@
 1 - Nultris program
-- Move setup (ie make shapes bit espcially) into own module.
+- add function to convert frame to teensy_frame (ie less characters)
+- add function to send teensy_frame to teensy
 - Make file and input process for config, ie serial connection, colours and bloxel mapping
 - Increase game speed
 - Game start add some kind of button press to start game
 - Add N - U - L - T - Y animation at start of each game
 - Add animations for removing rows and game over
-- Prorbabyl put animation data in own module or possibley import file.
 
-- Communication library for pc
-Start libary for sending frames to teensey
-
-- Teensey code for interpeting data sent
-Start teensy code for recieving frames
+2 - Teensy code
+- fuctnion to recive teensy_frame
+- test by sending it back
