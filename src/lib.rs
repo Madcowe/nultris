@@ -1,5 +1,5 @@
 use crossterm::{
-    cursor::{self, SetCursorStyle},
+    cursor::{self},
     event::{poll, read, Event, KeyCode},
     execute, queue,
     style::{Color, Print, SetForegroundColor},
@@ -7,12 +7,13 @@ use crossterm::{
 };
 use gilrs::{Axis, EventType, Gilrs};
 use rand::prelude::*;
-use serialport::{self, SerialPort, SerialPortBuilder};
+use serialport::{self, SerialPort};
+use std::time::SystemTime;
+use std::{io::BufReader, iter::Enumerate, time::Duration};
 use std::{
-    io::{self, Bytes, Write},
+    io::{self, Write},
     isize,
 };
-use std::{ops::Add, time::Duration};
 use std::{thread, time};
 
 #[derive(Debug, Clone, Copy)]
@@ -30,10 +31,24 @@ struct Piece {
     orientation: usize,
 }
 
-fn send_teensy_frame(teensy_frame: &Vec<u8>, port: &mut Box<dyn SerialPort>) {
-    // for byte in teensy_frame {
+fn send_teensy_frame(teensy_frame: &Vec<u8>, port: &mut Box<dyn SerialPort>, now: SystemTime) {
     port.write(teensy_frame).expect("Write failed!");
+    let mut buffer = [0; 600];
+    port.read(&mut buffer).unwrap();
+    let buffer = buffer.to_vec();
+    // let mut matching = 0;
+    // for i in 0..teensy_frame.len() {
+    //     if teensy_frame[i] == buffer[i] {
+    //         matching += 1;
+    //     }
     // }
+    let matching = teensy_frame
+        .iter()
+        .zip(buffer.iter())
+        .filter(|&(teensy_frame, buffer)| teensy_frame == buffer)
+        .count();
+    let elapsed = now.elapsed().unwrap();
+    eprintln!("{}: {}/600", elapsed.as_millis(), matching);
 }
 
 pub fn main_loop() -> io::Result<()> {
@@ -65,12 +80,14 @@ pub fn main_loop() -> io::Result<()> {
     let (mut up_pressed, mut down_pressed, mut left_pressed, mut right_pressed) =
         (false, false, false, false);
 
+    let now = SystemTime::now();
+
     // When quit button is pressed quit the game
     loop {
         let frame = create_frame(&play_area, &current_piece);
         if teensy_connected {
             let teensy_frame = create_teensy_frame(&frame);
-            send_teensy_frame(&teensy_frame, &mut port);
+            send_teensy_frame(&teensy_frame, &mut port, now);
         }
         render_frame(&frame)?;
         let (mut x, mut y, mut orientation) =
@@ -173,7 +190,7 @@ pub fn main_loop() -> io::Result<()> {
             let restart_delay = time::Duration::from_millis(1000);
             thread::sleep(restart_delay);
         }
-        break (); // only do one loop while testing sending to teensy
+        // break (); // only do one loop while testing sending to teensy
     }
 
     terminal::disable_raw_mode()?;

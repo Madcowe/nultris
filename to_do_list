@@ -1,6 +1,5 @@
 1 - Nultris program
-- add function to convert frame to teensy_frame (ie less characters)
-- add function to send teensy_frame to teensy
+- Modify send_to_teensy to recieve data sent back from teensy and compare to what it sent to make sure it matches
 - Make file and input process for config, ie serial connection, colours and bloxel mapping
 - Increase game speed
 - Game start add some kind of button press to start game

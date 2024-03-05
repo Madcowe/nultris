@@ -18,7 +18,8 @@ void loop() {
         
 	if (Serial.available() > 0) {
 		incomingByte = Serial.read();
-		Serial.println(incomingByte, DEC);
+		//Serial.println(incomingByte, DEC);
+    Serial.write(incomingByte);
 	}
 
 }
