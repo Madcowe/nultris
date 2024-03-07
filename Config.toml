@@ -1,0 +1,18 @@
+teensy_port = '/dev/ttyACM0'
+
+# color.background.r = 0
+# color.background.g = 0
+# color.background.b = 0
+color.background = { r = 0, g = 0, b = 0}
+color.l_tetromino.r = 255
+color.l_tetromino.g = 0
+color.l_tetromino.b = 0
+
+# x and y are bloxel co-rdinates starting from top left with is 0,0
+# down to bottom right which is 9,19 order is the order that the
+# LEDs are phyically connected 0-199, 0 being the one directly 
+# connected to the controller
+bloxel_mapping = [
+	{ x = 0, y = 0, order = 0 },
+	{ x = 0, y = 1, order = 1 }
+]
