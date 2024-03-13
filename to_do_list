@@ -6,5 +6,5 @@
 - Add animations for removing rows and game over
 
 2 - Teensy code
-- fuctnion to recive teensy_frame
-- test by sending it back
+- Work out command needed to send spi when LED connected
+- Make function to process data being sent

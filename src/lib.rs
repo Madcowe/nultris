@@ -52,17 +52,9 @@ fn send_teensy_frame(teensy_frame: &Vec<u8>, port: &mut Box<dyn SerialPort>, now
 }
 
 pub fn main_loop() -> io::Result<()> {
-    let mut teensy_connected = false;
-    let port = serialport::new("/dev/ttyACM0", 115_200)
+    let mut port = serialport::new("/dev/ttyACM0", 115_200)
         .timeout(Duration::from_millis(10))
         .open();
-    if let Ok(_) = port {
-        teensy_connected = true;
-    }
-    let mut port = port.unwrap();
-    eprintln!("{}", teensy_connected);
-    // .expect("Failed to open port");
-    // setup, maybe move to own funciton later
     let bg_color = Color::Rgb {
         r: 42,
         g: 33,
@@ -85,9 +77,13 @@ pub fn main_loop() -> io::Result<()> {
     // When quit button is pressed quit the game
     loop {
         let frame = create_frame(&play_area, &current_piece);
-        if teensy_connected {
-            let teensy_frame = create_teensy_frame(&frame);
-            send_teensy_frame(&teensy_frame, &mut port, now);
+        // if teensy_connected {
+        match port {
+            Ok(ref mut port) => {
+                let teensy_frame = create_teensy_frame(&frame);
+                send_teensy_frame(&teensy_frame, port, now);
+            }
+            Err(_) => (),
         }
         render_frame(&frame)?;
         let (mut x, mut y, mut orientation) =
