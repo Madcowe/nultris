@@ -150,14 +150,49 @@ pub fn main_loop() -> io::Result<()> {
         if game_over {
             // game over animation
             play_area = create_play_area(10, 20, bg_color);
+            down_pressed = false;
 
             (current_piece, game_over) = create_current_piece(&play_area, &pieces);
             // this pauses but imput loop doesn't?
             let restart_delay = time::Duration::from_millis(1000);
             thread::sleep(restart_delay);
+            while poll(time::Duration::from_secs(1))? {
+                read()?;
+            }
+            loop {
+                if poll(delay)? {
+                    if let Event::Key(event) = read()? {
+                        match event.code {
+                            KeyCode::Down => {
+                                break();
+                            }
+                            _ => ()
+                        }
+                    }
+                }
+                // joystick controls
+                while let Some(gilrs::Event { id, event, time }) = gilrs.next_event() {
+                    if let EventType::AxisChanged(axis, position, _) = event {
+                        // eprintln!("{:?} {} joy_x: {} joy_y: {}", axis, position, joy_x, joy_y);
+                        match axis {
+                            Axis::LeftStickY => {
+                                joy_y = position;
+                                if joy_y < -0.5 && !down_pressed {
+                                    down_pressed = true;
+                                } else if joy_y >= -0.5 && down_pressed {
+                                    down_pressed = false;
+                                }
+                            }
+                            _ => (),
+                        }
+                    }
+                }
+                if down_pressed {
+                    break;
+                }
+            }
         }
     }
-
     terminal::disable_raw_mode()?;
     Ok(())
 }
