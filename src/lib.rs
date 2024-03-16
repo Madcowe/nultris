@@ -10,7 +10,7 @@ use gilrs::{Axis, EventType, Gilrs};
 use rand::prelude::*;
 use std::{
     io::{self, Write},
-    isize,
+    isize, time::Duration, ops::AddAssign,
 };
 use std::{thread, time};
 
@@ -41,7 +41,7 @@ pub fn main_loop() -> io::Result<()> {
     terminal::enable_raw_mode()?;
     let pieces = create_pieces();
     let (mut current_piece, mut game_over) = create_current_piece(&play_area, &pieces);
-    let delay = time::Duration::from_millis(250);
+    let mut delay = time::Duration::from_millis(250);
     // clear what is currently showing in terminal as render_frame doesn't do this
     execute!(io::stdout(), terminal::Clear(terminal::ClearType::All))?;
     let mut gilrs = Gilrs::new().unwrap();
@@ -132,7 +132,10 @@ pub fn main_loop() -> io::Result<()> {
         // if a piece stops moving create a new piece else move down
         if can_stop {
             add_shape_to_play_area(&mut play_area, &mut current_piece);
-            remove_complete_rows(&mut play_area, bg_color);
+            let speed_up = remove_complete_rows(&mut play_area, bg_color);
+            if speed_up && delay.as_millis() > 20 {
+                delay = time::Duration::from_millis(delay.as_millis() as u64 - 5);
+            }
             (current_piece, game_over) = create_current_piece(&play_area, &pieces);
         } else {
             _ = move_current_piece(
@@ -290,7 +293,7 @@ fn add_shape_to_play_area(play_area: &mut Vec<Vec<Bloxel>>, current_piece: &mut 
     }
 }
 
-fn remove_complete_rows(play_area: &mut Vec<Vec<Bloxel>>, bg_color: Color) {
+fn remove_complete_rows(play_area: &mut Vec<Vec<Bloxel>>, bg_color: Color) -> bool {
     let mut complete_rows = Vec::new();
     for y in 0..play_area[0].len() {
         let mut total_occupied = 0;
@@ -303,6 +306,7 @@ fn remove_complete_rows(play_area: &mut Vec<Vec<Bloxel>>, bg_color: Color) {
             }
         }
     }
+    let rows_removed = !complete_rows.is_empty();
     for row in complete_rows.into_iter() {
         for y in (0..row + 1).rev() {
             for x in 0..play_area.len() {
@@ -317,6 +321,7 @@ fn remove_complete_rows(play_area: &mut Vec<Vec<Bloxel>>, bg_color: Color) {
             }
         }
     }
+    rows_removed
 }
 
 fn create_frame(play_area: &Vec<Vec<Bloxel>>, current_piece: &Piece) -> Vec<Vec<Color>> {
