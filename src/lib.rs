@@ -7,9 +7,6 @@ use crossterm::{
 };
 use gilrs::{Axis, EventType, Gilrs};
 use rand::prelude::*;
-use serialport::{self, SerialPort};
-use std::time::SystemTime;
-use std::{io::BufReader, iter::Enumerate, time::Duration};
 use std::{
     io::{self, Write},
     isize,
@@ -31,30 +28,7 @@ struct Piece {
     orientation: usize,
 }
 
-fn send_teensy_frame(teensy_frame: &Vec<u8>, port: &mut Box<dyn SerialPort>, now: SystemTime) {
-    port.write(teensy_frame).expect("Write failed!");
-    let mut buffer = [0; 600];
-    port.read(&mut buffer).unwrap();
-    let buffer = buffer.to_vec();
-    // let mut matching = 0;
-    // for i in 0..teensy_frame.len() {
-    //     if teensy_frame[i] == buffer[i] {
-    //         matching += 1;
-    //     }
-    // }
-    let matching = teensy_frame
-        .iter()
-        .zip(buffer.iter())
-        .filter(|&(teensy_frame, buffer)| teensy_frame == buffer)
-        .count();
-    let elapsed = now.elapsed().unwrap();
-    eprintln!("{}: {}/600", elapsed.as_millis(), matching);
-}
-
 pub fn main_loop() -> io::Result<()> {
-    let mut port = serialport::new("/dev/ttyACM0", 115_200)
-        .timeout(Duration::from_millis(10))
-        .open();
     let bg_color = Color::Rgb {
         r: 42,
         g: 33,
@@ -72,19 +46,9 @@ pub fn main_loop() -> io::Result<()> {
     let (mut up_pressed, mut down_pressed, mut left_pressed, mut right_pressed) =
         (false, false, false, false);
 
-    let now = SystemTime::now();
-
     // When quit button is pressed quit the game
     loop {
         let frame = create_frame(&play_area, &current_piece);
-        // if teensy_connected {
-        match port {
-            Ok(ref mut port) => {
-                let teensy_frame = create_teensy_frame(&frame);
-                send_teensy_frame(&teensy_frame, port, now);
-            }
-            Err(_) => (),
-        }
         render_frame(&frame)?;
         let (mut x, mut y, mut orientation) =
             (current_piece.x, current_piece.y, current_piece.orientation);
@@ -186,7 +150,6 @@ pub fn main_loop() -> io::Result<()> {
             let restart_delay = time::Duration::from_millis(1000);
             thread::sleep(restart_delay);
         }
-        // break (); // only do one loop while testing sending to teensy
     }
 
     terminal::disable_raw_mode()?;
@@ -382,23 +345,6 @@ fn create_frame(play_area: &Vec<Vec<Bloxel>>, current_piece: &Piece) -> Vec<Vec<
         x += 1;
     }
     frame
-}
-
-fn create_teensy_frame(frame: &Vec<Vec<Color>>) -> Vec<u8> {
-    let mut teensy_frame = Vec::new();
-    for column in frame {
-        for color in column {
-            match color {
-                Color::Rgb { r, g, b } => {
-                    teensy_frame.push(*r);
-                    teensy_frame.push(*g);
-                    teensy_frame.push(*b);
-                }
-                _ => (),
-            }
-        }
-    }
-    teensy_frame
 }
 
 fn render_frame(frame: &Vec<Vec<Color>>) -> io::Result<()> {

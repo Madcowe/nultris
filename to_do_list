@@ -1,10 +1,7 @@
 1 - Nultris program
+- Remove teensy code
 - Make file and input process for config, ie serial connection, colours and bloxel mapping
 - Increase game speed
 - Game start add some kind of button press to start game
 - Add N - U - L - T - Y animation at start of each game
 - Add animations for removing rows and game over
-
-2 - Teensy code
-- Work out command needed to send spi when LED connected
-- Make function to process data being sent
