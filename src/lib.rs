@@ -1,7 +1,7 @@
 use crate::sprites::create_pieces;
 use crossterm::{
     cursor::{self},
-    event::{poll, read, Event, KeyCode},
+    event::{poll, read, Event, KeyCode, KeyEventKind},
     execute, queue,
     style::{Color, Print, SetForegroundColor},
     terminal,
@@ -10,7 +10,9 @@ use gilrs::{Axis, EventType, Gilrs};
 use rand::prelude::*;
 use std::{
     io::{self, Write},
-    isize, time::Duration, ops::AddAssign,
+    isize,
+    ops::AddAssign,
+    time::Duration,
 };
 use std::{thread, time};
 
@@ -62,29 +64,31 @@ pub fn main_loop() -> io::Result<()> {
         }
         if poll(delay)? {
             if let Event::Key(event) = read()? {
-                match event.code {
-                    KeyCode::Char(c) => {
-                        if c == 'q' {
-                            break;
+                if event.kind == KeyEventKind::Press {
+                    match event.code {
+                        KeyCode::Char(c) => {
+                            if c == 'q' {
+                                break;
+                            }
                         }
-                    }
-                    KeyCode::Left => {
-                        x = current_piece.x - 1;
-                    }
-                    KeyCode::Right => {
-                        x = current_piece.x + 1;
-                    }
-                    KeyCode::Up => {
-                        // if not at end of shapes then orientation + 1 other wise set to 0
-                        orientation = 0;
-                        if current_piece.orientation < current_piece.shapes.len() - 1 {
-                            orientation = current_piece.orientation + 1;
+                        KeyCode::Left => {
+                            x = current_piece.x - 1;
                         }
+                        KeyCode::Right => {
+                            x = current_piece.x + 1;
+                        }
+                        KeyCode::Up => {
+                            // if not at end of shapes then orientation + 1 other wise set to 0
+                            orientation = 0;
+                            if current_piece.orientation < current_piece.shapes.len() - 1 {
+                                orientation = current_piece.orientation + 1;
+                            }
+                        }
+                        KeyCode::Down => {
+                            y = current_piece.y + 1;
+                        }
+                        _ => (),
                     }
-                    KeyCode::Down => {
-                        y = current_piece.y + 1;
-                    }
-                    _ => (),
                 }
             }
         }
@@ -164,9 +168,9 @@ pub fn main_loop() -> io::Result<()> {
                     if let Event::Key(event) = read()? {
                         match event.code {
                             KeyCode::Down => {
-                                break();
+                                break ();
                             }
-                            _ => ()
+                            _ => (),
                         }
                     }
                 }
