@@ -34,11 +34,7 @@ pub struct Piece {
 }
 
 pub fn main_loop() -> io::Result<()> {
-    let bg_color = Color::Rgb {
-        r: 42,
-        g: 33,
-        b: 57,
-    };
+    let bg_color = Color::Rgb { r: 0, g: 0, b: 0 };
     let mut play_area = create_play_area(10, 20, bg_color);
     terminal::enable_raw_mode()?;
     let pieces = create_pieces();

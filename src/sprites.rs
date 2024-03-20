@@ -17,11 +17,7 @@ pub fn create_pieces() -> Vec<Piece> {
     let mut piece: Piece = Piece {
         x: 4,
         y: 0,
-        color: Color::Rgb {
-            r: 205,
-            g: 152,
-            b: 211,
-        },
+        color: Color::Rgb { r: 0, g: 0, b: 255 },
         shapes,
         orientation: 0,
     };
@@ -58,9 +54,9 @@ pub fn create_pieces() -> Vec<Piece> {
         x: 4,
         y: 0,
         color: Color::Rgb {
-            r: 221,
-            g: 77,
-            b: 182,
+            r: 255,
+            g: 255,
+            b: 0,
         },
         shapes,
         orientation: 0,
@@ -77,9 +73,9 @@ pub fn create_pieces() -> Vec<Piece> {
         x: 4,
         y: 0,
         color: Color::Rgb {
-            r: 23,
-            g: 21,
-            b: 41,
+            r: 0,
+            g: 255,
+            b: 255,
         },
         shapes,
         orientation: 0,
@@ -95,11 +91,7 @@ pub fn create_pieces() -> Vec<Piece> {
     piece = Piece {
         x: 4,
         y: 0,
-        color: Color::Rgb {
-            r: 82,
-            g: 155,
-            b: 129,
-        },
+        color: Color::Rgb { r: 0, g: 255, b: 0 },
         shapes,
         orientation: 0,
     };
@@ -114,11 +106,7 @@ pub fn create_pieces() -> Vec<Piece> {
     piece = Piece {
         x: 4,
         y: 0,
-        color: Color::Rgb {
-            r: 136,
-            g: 73,
-            b: 128,
-        },
+        color: Color::Rgb { r: 255, g: 0, b: 0 },
         shapes,
         orientation: 0,
     };
@@ -138,9 +126,9 @@ pub fn create_pieces() -> Vec<Piece> {
         x: 4,
         y: 0,
         color: Color::Rgb {
-            r: 255,
-            g: 167,
-            b: 235,
+            r: 147,
+            g: 112,
+            b: 219,
         },
         shapes,
         orientation: 0,
