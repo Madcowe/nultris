@@ -150,13 +150,13 @@ pub fn main_loop() -> io::Result<()> {
         if game_over {
             // game over animation
             play_area = create_play_area(10, 20, bg_color);
+            let frame = create_blank_frame(bg_color);
+            render_frame(&frame)?;
             down_pressed = false;
-
             (current_piece, game_over) = create_current_piece(&play_area, &pieces);
-            // this pauses but imput loop doesn't?
-            let restart_delay = time::Duration::from_millis(1000);
-            thread::sleep(restart_delay);
-            while poll(time::Duration::from_secs(1))? {
+            // let restart_delay = time::Duration::from_millis(1000);
+            // thread::sleep(restart_delay);
+            while poll(time::Duration::from_secs(0))? {
                 read()?;
             }
             loop {
@@ -387,6 +387,12 @@ fn create_frame(play_area: &Vec<Vec<Bloxel>>, current_piece: &Piece) -> Vec<Vec<
         y = current_piece.y;
         x += 1;
     }
+    frame
+}
+
+fn create_blank_frame(bg_color: Color) -> Vec<Vec<Color>> {
+    let column: Vec<Color> = vec![bg_color; 20];
+    let frame: Vec<Vec<Color>> = vec![column; 10];
     frame
 }
 
