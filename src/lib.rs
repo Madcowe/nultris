@@ -44,8 +44,6 @@ pub fn main_loop() -> io::Result<()> {
     execute!(io::stdout(), terminal::Clear(terminal::ClearType::All))?;
     let mut gilrs = Gilrs::new().unwrap();
     let (mut joy_x, mut joy_y); // = (0f32, 0f32);
-    let (mut up_pressed, mut down_pressed, mut left_pressed, mut right_pressed) =
-        (false, false, false, false);
 
     // When quit button is pressed quit the game
     loop {
@@ -95,33 +93,21 @@ pub fn main_loop() -> io::Result<()> {
                 match axis {
                     Axis::LeftStickX => {
                         joy_x = position;
-                        if joy_x > 0.5 && !right_pressed {
+                        if joy_x > 0.0 {
                             x = current_piece.x + 1;
-                            right_pressed = true
-                        } else if joy_x <= 0.5 && right_pressed {
-                            right_pressed = false;
-                        } else if joy_x < -0.5 && !left_pressed {
+                        } else if joy_x < 0.0 {
                             x = current_piece.x - 1;
-                            left_pressed = true;
-                        } else if joy_x >= -0.5 && left_pressed {
-                            left_pressed = false;
                         }
                     }
                     Axis::LeftStickY => {
                         joy_y = position;
-                        if joy_y > 0.5 && !up_pressed {
+                        if joy_y > 0.0 {
                             orientation = 0;
                             if current_piece.orientation < current_piece.shapes.len() - 1 {
                                 orientation = current_piece.orientation + 1;
                             }
-                            up_pressed = true;
-                        } else if joy_y <= 0.5 && up_pressed {
-                            up_pressed = false;
-                        } else if joy_y < -0.5 && !down_pressed {
+                        } else if joy_y < 0.0 {
                             y = current_piece.y + 1;
-                            down_pressed = true;
-                        } else if joy_y >= -0.5 && down_pressed {
-                            down_pressed = false;
                         }
                     }
                     _ => (),
@@ -152,7 +138,6 @@ pub fn main_loop() -> io::Result<()> {
             play_area = create_play_area(10, 20, bg_color);
             let frame = create_blank_frame(bg_color);
             render_frame(&frame)?;
-            down_pressed = false;
             (current_piece, game_over) = create_current_piece(&play_area, &pieces);
             // let restart_delay = time::Duration::from_millis(1000);
             // thread::sleep(restart_delay);
@@ -171,16 +156,15 @@ pub fn main_loop() -> io::Result<()> {
                     }
                 }
                 // joystick controls
+                let mut down_pressed = false;
                 while let Some(gilrs::Event { id, event, time }) = gilrs.next_event() {
                     if let EventType::AxisChanged(axis, position, _) = event {
                         // eprintln!("{:?} {} joy_x: {} joy_y: {}", axis, position, joy_x, joy_y);
                         match axis {
                             Axis::LeftStickY => {
                                 joy_y = position;
-                                if joy_y < -0.5 && !down_pressed {
+                                if joy_y < 0.0 {
                                     down_pressed = true;
-                                } else if joy_y >= -0.5 && down_pressed {
-                                    down_pressed = false;
                                 }
                             }
                             _ => (),
