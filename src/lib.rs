@@ -8,13 +8,11 @@ use crossterm::{
 };
 use gilrs::{Axis, EventType, Gilrs};
 use rand::prelude::*;
+use std::{io::LineWriter, time};
 use std::{
     io::{self, Write},
     isize,
-    ops::AddAssign,
-    time::Duration,
 };
-use std::{thread, time};
 
 mod sprites;
 
@@ -34,6 +32,7 @@ pub struct Piece {
 }
 
 pub fn main_loop() -> io::Result<()> {
+    let mut lines_done = 0;
     let bg_color = Color::Rgb { r: 0, g: 0, b: 0 };
     let mut play_area = create_play_area(10, 20, bg_color);
     terminal::enable_raw_mode()?;
@@ -118,8 +117,10 @@ pub fn main_loop() -> io::Result<()> {
         // if a piece stops moving create a new piece else move down
         if can_stop {
             add_shape_to_play_area(&mut play_area, &mut current_piece);
-            let speed_up = remove_complete_rows(&mut play_area, bg_color);
-            if speed_up && delay.as_millis() > 20 {
+            let rows_removed = remove_complete_rows(&mut play_area, bg_color);
+            lines_done += rows_removed;
+            eprintln!("{}", lines_done);
+            if rows_removed > 0 && delay.as_millis() > 20 {
                 delay = time::Duration::from_millis(delay.as_millis() as u64 - 5);
             }
             (current_piece, game_over) = create_current_piece(&play_area, &pieces);
@@ -312,7 +313,7 @@ fn add_shape_to_play_area(play_area: &mut Vec<Vec<Bloxel>>, current_piece: &mut 
     }
 }
 
-fn remove_complete_rows(play_area: &mut Vec<Vec<Bloxel>>, bg_color: Color) -> bool {
+fn remove_complete_rows(play_area: &mut Vec<Vec<Bloxel>>, bg_color: Color) -> usize {
     let mut complete_rows = Vec::new();
     for y in 0..play_area[0].len() {
         let mut total_occupied = 0;
@@ -325,7 +326,7 @@ fn remove_complete_rows(play_area: &mut Vec<Vec<Bloxel>>, bg_color: Color) -> bo
             }
         }
     }
-    let rows_removed = !complete_rows.is_empty();
+    let rows_removed = complete_rows.len();
     for row in complete_rows.into_iter() {
         for y in (0..row + 1).rev() {
             for x in 0..play_area.len() {

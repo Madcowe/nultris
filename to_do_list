@@ -1,6 +1,5 @@
 1 - Nultris program
-- Make file and input process for config, ie serial connection, colours and bloxel mapping
-- Game start add some kind of button press to start game
+- Display current score and leave on screen at end of game
 - Add N - U - L - T - Y animation at start of each game
 - Add animations for removing rows and game over
 
