@@ -1,4 +1,4 @@
-use crate::sprites::create_pieces;
+use crate::sprites::{create_numerals, create_pieces};
 use crossterm::{
     cursor::{self},
     event::{poll, read, Event, KeyCode, KeyEventKind},
@@ -8,7 +8,7 @@ use crossterm::{
 };
 use gilrs::{Axis, EventType, Gilrs};
 use rand::prelude::*;
-use std::{io::LineWriter, time};
+use std::time;
 use std::{
     io::{self, Write},
     isize,
@@ -31,12 +31,21 @@ pub struct Piece {
     orientation: usize,
 }
 
+#[derive(Debug, Clone)]
+pub struct Numeral {
+    x: isize,
+    y: isize,
+    color: Color,
+    shape: [[u8; 8]; 8],
+}
+
 pub fn main_loop() -> io::Result<()> {
     let mut lines_done = 0;
     let bg_color = Color::Rgb { r: 0, g: 0, b: 0 };
     let mut play_area = create_play_area(10, 20, bg_color);
     terminal::enable_raw_mode()?;
     let pieces = create_pieces();
+    let numerals = create_numerals();
     let (mut current_piece, mut game_over) = create_current_piece(&play_area, &pieces);
     let mut delay = time::Duration::from_millis(250);
     // clear what is currently showing in terminal as render_frame doesn't do this
@@ -119,7 +128,7 @@ pub fn main_loop() -> io::Result<()> {
             add_shape_to_play_area(&mut play_area, &mut current_piece);
             let rows_removed = remove_complete_rows(&mut play_area, bg_color);
             lines_done += rows_removed;
-            eprintln!("{}", lines_done);
+            eprintln!(" Lines done: {}", lines_done);
             if rows_removed > 0 && delay.as_millis() > 20 {
                 delay = time::Duration::from_millis(delay.as_millis() as u64 - 5);
             }
