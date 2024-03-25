@@ -187,6 +187,7 @@ pub fn main_loop() -> io::Result<()> {
                     break;
                 }
             }
+            lines_done = 0;
         }
     }
     terminal::disable_raw_mode()?;
