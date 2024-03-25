@@ -128,7 +128,7 @@ pub fn main_loop() -> io::Result<()> {
             add_shape_to_play_area(&mut play_area, &mut current_piece);
             let rows_removed = remove_complete_rows(&mut play_area, bg_color);
             lines_done += rows_removed;
-            eprintln!(" Lines done: {}", lines_done);
+            eprintln!(" {} lines done", lines_done);
             if rows_removed > 0 && delay.as_millis() > 20 {
                 delay = time::Duration::from_millis(delay.as_millis() as u64 - 5);
             }
@@ -188,6 +188,7 @@ pub fn main_loop() -> io::Result<()> {
                 }
             }
             lines_done = 0;
+            delay = time::Duration::from_millis(250);
         }
     }
     terminal::disable_raw_mode()?;
