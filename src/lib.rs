@@ -31,7 +31,7 @@ pub struct Piece {
     orientation: usize,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct Numeral {
     x: isize,
     y: isize,
@@ -146,7 +146,9 @@ pub fn main_loop() -> io::Result<()> {
         if game_over {
             // game over animation
             play_area = create_play_area(10, 20, bg_color);
-            let frame = create_blank_frame(bg_color);
+            // let frame = create_blank_frame(bg_color);
+            let numerals = get_numerals_to_display(lines_done, &numerals);
+            let frame = create_numeral_frame(bg_color, numerals);
             render_frame(&frame)?;
             (current_piece, game_over) = create_current_piece(&play_area, &pieces);
             // let restart_delay = time::Duration::from_millis(1000);
@@ -387,6 +389,39 @@ fn create_frame(play_area: &Vec<Vec<Bloxel>>, current_piece: &Piece) -> Vec<Vec<
 fn create_blank_frame(bg_color: Color) -> Vec<Vec<Color>> {
     let column: Vec<Color> = vec![bg_color; 20];
     let frame: Vec<Vec<Color>> = vec![column; 10];
+    frame
+}
+
+fn get_numerals_to_display(lines_done: usize, numerals: &Vec<Numeral>) -> Vec<Numeral> {
+    let chars = lines_done.to_string();
+    let mut numerals_to_display = Vec::new();
+
+    for (i, char) in chars.char_indices() {
+        let char = char.to_digit(10).unwrap() as usize;
+        let mut numeral = numerals[char];
+        numeral.x = 2;
+        numeral.y = i as isize * 7;
+        numerals_to_display.push(numeral);
+    }
+    numerals_to_display
+}
+
+fn create_numeral_frame(bg_color: Color, numerals: Vec<Numeral>) -> Vec<Vec<Color>> {
+    let mut frame = create_blank_frame(bg_color);
+    for numeral in numerals {
+        let shape = numeral.shape;
+        let (mut x, mut y, color) = (numeral.x as usize, numeral.y as usize, numeral.color);
+        for column in shape {
+            for occupied in column {
+                if occupied > 0 && x < frame.len() && y < frame[0].len() {
+                    frame[x][y] = color;
+                }
+                y += 1;
+            }
+            y = numeral.y as usize;
+            x += 1;
+        }
+    }
     frame
 }
 

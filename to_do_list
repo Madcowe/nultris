@@ -1,7 +1,5 @@
 1 - Nultris program
-- Display current score and leave on screen at end of game
-- Make function get numbers that need to be displayed
-- Make function to render numerals to screen
+- Make lines done reset at start of new game
 - Add N - U - L - T - Y animation at start of each game
 - Add animations for removing rows and game over
 
