@@ -416,15 +416,15 @@ fn create_numeral_frame(bg_color: Color, numerals: Vec<Numeral>) -> Vec<Vec<Colo
     let mut frame = create_blank_frame(bg_color);
     for numeral in numerals {
         let shape = numeral.shape;
-        let (mut x, mut y, color) = (numeral.x as usize, numeral.y as usize, numeral.color);
+        let (mut x, mut y, color) = (numeral.x as usize, numeral.y, numeral.color);
         for column in shape {
             for occupied in column {
-                if occupied > 0 && x < frame.len() && y < frame[0].len() {
-                    frame[x][y] = color;
+                if occupied > 0 && x < frame.len() && y >= 0 && y < frame[0].len() as isize {
+                    frame[x][y as usize] = color;
                 }
                 y += 1;
             }
-            y = numeral.y as usize;
+            y = numeral.y;
             x += 1;
         }
     }
@@ -432,11 +432,16 @@ fn create_numeral_frame(bg_color: Color, numerals: Vec<Numeral>) -> Vec<Vec<Colo
 }
 
 fn nulty_animation(bg_color: Color, nulty: &Vec<Numeral>) -> io::Result<()> {
-    for i in 0..nulty.len() {
-        let letters = vec![nulty[i]];
+    for i in 0..(nulty.len() * 10) + 10 {
+        let mut letters = Vec::new();
+        for j in 0..nulty.len() {
+            let mut letter = nulty[j];
+            letter.y = i as isize - (j as isize * 10);
+            letters.push(letter);
+        }
         let frame = create_numeral_frame(bg_color, letters);
         render_frame(&frame)?;
-        let delay = time::Duration::from_millis(500);
+        let delay = time::Duration::from_millis(70);
         thread::sleep(delay);
     }
     Ok(())
