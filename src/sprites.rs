@@ -1,6 +1,150 @@
 use crate::{Numeral, Piece};
 use crossterm::style::Color;
 
+pub fn create_nulty() -> Vec<Numeral> {
+    let mut numerals = Vec::new();
+
+    // N
+    let shape: [[u8; 8]; 8] = [
+        [1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1, 1, 1, 1],
+        [0, 1, 1, 1, 0, 0, 0, 0],
+        [0, 0, 1, 1, 1, 0, 0, 0],
+        [0, 0, 0, 1, 1, 1, 0, 0],
+        [0, 0, 0, 0, 1, 1, 1, 0],
+        [1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1, 1, 1, 1],
+    ];
+    let numeral: Numeral = Numeral {
+        x: 1,
+        y: 1,
+        color: Color::Rgb {
+            r: 115,
+            g: 196,
+            b: 144,
+        },
+        shape,
+    };
+    numerals.push(numeral);
+
+    // U
+    let shape: [[u8; 8]; 8] = [
+        [1, 1, 1, 1, 1, 1, 1, 0],
+        [1, 1, 1, 1, 1, 1, 1, 1],
+        [0, 0, 0, 0, 0, 0, 1, 1],
+        [0, 0, 0, 0, 0, 0, 1, 1],
+        [0, 0, 0, 0, 0, 0, 1, 1],
+        [0, 0, 0, 0, 0, 0, 1, 1],
+        [1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1, 1, 1, 0],
+    ];
+    let numeral: Numeral = Numeral {
+        x: 1,
+        y: 1,
+        color: Color::Rgb {
+            r: 115,
+            g: 196,
+            b: 144,
+        },
+        shape,
+    };
+    numerals.push(numeral);
+
+    // L
+    let shape: [[u8; 8]; 8] = [
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [1, 1, 1, 1, 1, 1, 1, 0],
+        [1, 1, 1, 1, 1, 1, 1, 1],
+        [0, 0, 0, 0, 0, 0, 1, 1],
+        [0, 0, 0, 0, 0, 0, 1, 1],
+        [0, 0, 0, 0, 0, 0, 1, 1],
+        [0, 0, 0, 0, 0, 0, 1, 1],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+    ];
+    let numeral: Numeral = Numeral {
+        x: 1,
+        y: 1,
+        color: Color::Rgb {
+            r: 115,
+            g: 196,
+            b: 144,
+        },
+        shape,
+    };
+    numerals.push(numeral);
+
+    // T
+    let shape: [[u8; 8]; 8] = [
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [1, 1, 0, 0, 0, 0, 0, 0],
+        [1, 1, 0, 0, 0, 0, 0, 0],
+        [1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 1, 0, 0, 0, 0, 0, 0],
+        [1, 1, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+    ];
+    let numeral: Numeral = Numeral {
+        x: 1,
+        y: 1,
+        color: Color::Rgb {
+            r: 115,
+            g: 196,
+            b: 144,
+        },
+        shape,
+    };
+    numerals.push(numeral);
+
+    // Y
+    let shape: [[u8; 8]; 8] = [
+        [1, 1, 0, 0, 0, 0, 0, 0],
+        [1, 1, 1, 1, 0, 0, 0, 0],
+        [0, 0, 1, 1, 0, 0, 0, 0],
+        [0, 0, 0, 1, 1, 1, 1, 1],
+        [0, 0, 0, 1, 1, 1, 1, 1],
+        [0, 0, 1, 1, 0, 0, 0, 0],
+        [1, 1, 1, 1, 0, 0, 0, 0],
+        [1, 1, 0, 0, 0, 0, 0, 0],
+    ];
+    let numeral: Numeral = Numeral {
+        x: 1,
+        y: 1,
+        color: Color::Rgb {
+            r: 115,
+            g: 196,
+            b: 144,
+        },
+        shape,
+    };
+    numerals.push(numeral);
+
+    // +
+    let shape: [[u8; 8]; 8] = [
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 1, 1, 0, 0, 0],
+        [0, 0, 0, 1, 1, 0, 0, 0],
+        [0, 1, 1, 1, 1, 1, 1, 0],
+        [0, 1, 1, 1, 1, 1, 1, 0],
+        [0, 0, 0, 1, 1, 0, 0, 0],
+        [0, 0, 0, 1, 1, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+    ];
+    let numeral: Numeral = Numeral {
+        x: 1,
+        y: 1,
+        color: Color::Rgb {
+            r: 115,
+            g: 196,
+            b: 144,
+        },
+        shape,
+    };
+    numerals.push(numeral);
+
+    numerals
+}
+
 pub fn create_numerals() -> Vec<Numeral> {
     let mut numerals = Vec::new();
 
@@ -273,9 +417,9 @@ pub fn create_pieces() -> Vec<Piece> {
         x: 4,
         y: 0,
         color: Color::Rgb {
-            r: 115,
-            g: 196,
-            b: 144,
+            r: 255,
+            g: 165,
+            b: 0,
         },
         shapes,
         orientation: 0,

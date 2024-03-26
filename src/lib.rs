@@ -1,4 +1,5 @@
 use crate::sprites::{create_numerals, create_pieces};
+
 use crossterm::{
     cursor::{self},
     event::{poll, read, Event, KeyCode, KeyEventKind},
@@ -8,11 +9,12 @@ use crossterm::{
 };
 use gilrs::{Axis, EventType, Gilrs};
 use rand::prelude::*;
-use std::time;
+use sprites::create_nulty;
 use std::{
     io::{self, Write},
     isize,
 };
+use std::{thread, time};
 
 mod sprites;
 
@@ -46,6 +48,7 @@ pub fn main_loop() -> io::Result<()> {
     terminal::enable_raw_mode()?;
     let pieces = create_pieces();
     let numerals = create_numerals();
+    let nulty = create_nulty();
     let (mut current_piece, mut game_over) = create_current_piece(&play_area, &pieces);
     let mut delay = time::Duration::from_millis(250);
     // clear what is currently showing in terminal as render_frame doesn't do this
@@ -189,6 +192,7 @@ pub fn main_loop() -> io::Result<()> {
             }
             lines_done = 0;
             delay = time::Duration::from_millis(250);
+            nulty_animation(bg_color, &nulty);
         }
     }
     terminal::disable_raw_mode()?;
@@ -425,6 +429,17 @@ fn create_numeral_frame(bg_color: Color, numerals: Vec<Numeral>) -> Vec<Vec<Colo
         }
     }
     frame
+}
+
+fn nulty_animation(bg_color: Color, nulty: &Vec<Numeral>) -> io::Result<()> {
+    for i in 0..nulty.len() {
+        let letters = vec![nulty[i]];
+        let frame = create_numeral_frame(bg_color, letters);
+        render_frame(&frame)?;
+        let delay = time::Duration::from_millis(500);
+        thread::sleep(delay);
+    }
+    Ok(())
 }
 
 fn render_frame(frame: &Vec<Vec<Color>>) -> io::Result<()> {
